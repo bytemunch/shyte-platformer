@@ -2,7 +2,7 @@ use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-// TODO next: Higher jump for longer button press
+// TODO next: Camera follow player
 
 fn main() {
     App::new()
@@ -21,7 +21,7 @@ fn main() {
 
 fn setup_graphics(mut commands: Commands) {
     let projection = OrthographicProjection {
-        scale: 1./6.,
+        scale: 1. / 6.,
         ..default()
     };
     // Add a camera so we can see the debug-render.
@@ -48,7 +48,9 @@ fn setup_physics(mut commands: Commands) {
 }
 
 #[derive(Component)]
-struct Player;
+struct Player {
+    jump_start: f32,
+}
 
 #[derive(Component)]
 struct CCAcceleration(Vec2);
@@ -75,42 +77,48 @@ fn create_character_controller(mut commands: Commands) {
         )))
         .insert(CCAcceleration(Vec2::new(0., 0.)))
         .insert(CCVelocity(Vec2::new(0., 0.)))
-        .insert(Player);
+        .insert(Player { jump_start: 0. });
 }
 
-const CC_JUMP_HEIGHT: f32 = 4.;
-const CC_GRAVITY: f32 = 0.2;
-const CC_WALKSPEED: f32 = 1.;
-const CC_WALKACCEL: f32 = 0.1;
+const CC_JUMP_ACCEL: f32 = 1.2;
+const CC_JUMP_MAX_DURATION: f32 = 0.3;
+const CC_GRAVITY: f32 = 0.3;
+
+const CC_WALK_SPEED: f32 = 2.3;
+const CC_WALK_ACCEL: f32 = 0.1;
 const CC_FRICTION_COEFFICIENT: f32 = 1.1;
 
 fn player_movement(
+    time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut player_info: Query<
-        (
-            &mut KinematicCharacterController,
-            &KinematicCharacterControllerOutput,
-            &mut CCAcceleration,
-            &mut CCVelocity,
-        ),
-        With<Player>,
-    >,
+    mut player_info: Query<(
+        &mut KinematicCharacterController,
+        &KinematicCharacterControllerOutput,
+        &mut CCAcceleration,
+        &mut CCVelocity,
+        &mut Player,
+    )>,
 ) {
-    for (mut controller, output, mut acc, mut vel) in &mut player_info {
+    for (mut controller, output, mut acc, mut vel, mut player) in &mut player_info {
         // friction
-        if output.grounded {
+        // if output.grounded {
             vel.0.x /= CC_FRICTION_COEFFICIENT;
-        }
+        // }
 
-        let up = keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up]);
+        let up_start = keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
+        let up_held = keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
         // let down = keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]);
         let left = keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]);
         let right = keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]);
 
-        let x_axis = (-(left as i8) + right as i8) as f32 * CC_WALKACCEL;
+        let x_axis = (-(left as i8) + right as i8) as f32 * CC_WALK_ACCEL;
 
-        let mut y_axis = if up && output.grounded {
-            CC_JUMP_HEIGHT
+        let mut y_axis = if up_start && output.grounded {
+            // JUMP
+            player.jump_start = time.elapsed_seconds();
+            CC_JUMP_ACCEL
+        } else if up_held && time.elapsed_seconds() - CC_JUMP_MAX_DURATION < player.jump_start {
+            CC_JUMP_ACCEL * (1.-(time.elapsed_seconds() - player.jump_start) / CC_JUMP_MAX_DURATION).powf(3.)
         } else {
             0.
         };
@@ -128,15 +136,15 @@ fn player_movement(
 
         vel.0 += acc.0;
 
-        if vel.0.x > CC_WALKSPEED {
-            vel.0.x = CC_WALKSPEED;
+        if vel.0.x > CC_WALK_SPEED {
+            vel.0.x = CC_WALK_SPEED;
         }
 
-        if vel.0.x < -CC_WALKSPEED {
-            vel.0.x = -CC_WALKSPEED;
+        if vel.0.x < -CC_WALK_SPEED {
+            vel.0.x = -CC_WALK_SPEED;
         }
 
-        println!("V: {:?} | A: {:?}", vel.0, acc.0);
+        // println!("V: {:?} | A: {:?}", vel.0, acc.0);
 
         controller.translation = Some(vel.0);
     }
