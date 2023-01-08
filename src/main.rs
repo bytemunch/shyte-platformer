@@ -2,7 +2,7 @@ use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-// TODO next: Camera follow player
+// TODO next: death and retry
 
 fn main() {
     App::new()
@@ -12,6 +12,8 @@ fn main() {
         .add_startup_system(setup_graphics)
         .add_startup_system(setup_physics)
         .add_startup_system(create_character_controller)
+        // systems
+        .add_system_to_stage(CoreStage::PreUpdate, camera_follow_player)
         // anything physicsy
         .add_system_to_stage(CoreStage::PreUpdate, player_movement)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
@@ -21,7 +23,7 @@ fn main() {
 
 fn setup_graphics(mut commands: Commands) {
     let projection = OrthographicProjection {
-        scale: 1. / 6.,
+        scale: 1. / 9.,
         ..default()
     };
     // Add a camera so we can see the debug-render.
@@ -80,6 +82,21 @@ fn create_character_controller(mut commands: Commands) {
         .insert(Player { jump_start: 0. });
 }
 
+fn camera_follow_player(
+    mut camera_transform: Query<&mut Transform, With<Camera2d>>,
+    query: Query<&GlobalTransform, With<Player>>,
+) {
+    // set camera translation to player translation
+    for player_transform in &query {
+        camera_transform.single_mut().translation = Vec3::new(
+            player_transform.translation().x + 50.,
+            -20.,
+            // player_transform.translation().y + 25.,
+            0.,
+        )
+    }
+}
+
 const CC_JUMP_ACCEL: f32 = 1.2;
 const CC_JUMP_MAX_DURATION: f32 = 0.3;
 const CC_GRAVITY: f32 = 0.3;
@@ -102,7 +119,7 @@ fn player_movement(
     for (mut controller, output, mut acc, mut vel, mut player) in &mut player_info {
         // friction
         // if output.grounded {
-            vel.0.x /= CC_FRICTION_COEFFICIENT;
+        vel.0.x /= CC_FRICTION_COEFFICIENT;
         // }
 
         let up_start = keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
@@ -118,7 +135,9 @@ fn player_movement(
             player.jump_start = time.elapsed_seconds();
             CC_JUMP_ACCEL
         } else if up_held && time.elapsed_seconds() - CC_JUMP_MAX_DURATION < player.jump_start {
-            CC_JUMP_ACCEL * (1.-(time.elapsed_seconds() - player.jump_start) / CC_JUMP_MAX_DURATION).powf(3.)
+            CC_JUMP_ACCEL
+                * (1. - (time.elapsed_seconds() - player.jump_start) / CC_JUMP_MAX_DURATION)
+                    .powf(3.)
         } else {
             0.
         };
