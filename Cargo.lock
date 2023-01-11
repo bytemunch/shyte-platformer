@@ -193,6 +193,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy-parallax"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f43fff43976f20c3bd9d92280c7976b5afcda5359e711e01a8e4842317e200e0"
+dependencies = [
+ "bevy",
+ "serde",
+]
+
+[[package]]
 name = "bevy_animation"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2055,6 +2065,7 @@ name = "my-first-bevy"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy-parallax",
  "bevy_rapier2d",
  "iyes_loopless",
 ]

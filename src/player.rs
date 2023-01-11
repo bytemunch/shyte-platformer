@@ -52,19 +52,19 @@ const CC_WALK_SPEED: f32 = 2.3;
 const CC_WALK_ACCEL: f32 = 0.1;
 const CC_FRICTION_COEFFICIENT: f32 = 1.1;
 
+const PLAYER_RADIUS: f32 = 4.;
+
 fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
     // Player
     commands
         .spawn(RigidBody::KinematicPositionBased)
-        .insert(Collider::ball(2.))
+        .insert(Collider::ball(PLAYER_RADIUS))
         .insert(KinematicCharacterController {
             apply_impulse_to_dynamic_bodies: true,
             translation: Some(Vec2::ZERO),
             ..default()
         })
-        .insert(TransformBundle::from(Transform::from_xyz(
-            -100.0, 10.0, 0.0,
-        )))
         .insert(CCAcceleration(Vec2::new(0., 0.)))
         .insert(CCVelocity(Vec2::new(0., 0.)))
         .insert(Player { jump_start: 0. })
@@ -73,9 +73,10 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             texture: asset_server.load("img/character/outline.png"),
             sprite: Sprite {
                 color: Color::WHITE,
-                custom_size: Some(Vec2::new(4.0, 4.0)),
+                custom_size: sprite_size,
                 ..default()
             },
+            transform: Transform::from_xyz(0.0, 0.0, 10.),
             ..default()
         })
         .with_children(|f| {
@@ -83,9 +84,10 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 texture: asset_server.load("img/character/body.png"),
                 sprite: Sprite {
                     color: Color::RED,
-                    custom_size: Some(Vec2::new(4.0, 4.0)),
+                    custom_size: sprite_size,
                     ..default()
                 },
+                transform: Transform::from_xyz(0.0, 0.0, 0.0),
                 ..default()
             });
         })
@@ -94,7 +96,7 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 texture: asset_server.load("img/character/face_angry.png"),
                 sprite: Sprite {
                     color: Color::WHITE,
-                    custom_size: Some(Vec2::new(4.0, 4.0)),
+                    custom_size: sprite_size,
                     ..default()
                 },
                 ..default()
