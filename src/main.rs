@@ -14,8 +14,7 @@ use pause::PausePlugin;
 use player::PlayerPlugin;
 use states::StatesPlugin;
 
-// TODO next: Mask sprites by shader
-// TODO after: Background image
+// TODO: Background image
 
 #[derive(Component)]
 pub struct InGameItem;

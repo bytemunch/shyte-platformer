@@ -1,8 +1,14 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use iyes_loopless::{prelude::{AppLooplessStateExt, IntoConditionalSystem, ConditionHelpers}, state::NextState};
+use iyes_loopless::{
+    prelude::{AppLooplessStateExt, ConditionHelpers, IntoConditionalSystem},
+    state::NextState,
+};
 
-use crate::{states::{GameState, PauseState}, InGameItem};
+use crate::{
+    states::{GameState, PauseState},
+    InGameItem,
+};
 
 #[derive(Component)]
 struct Player {
@@ -46,7 +52,7 @@ const CC_WALK_SPEED: f32 = 2.3;
 const CC_WALK_ACCEL: f32 = 0.1;
 const CC_FRICTION_COEFFICIENT: f32 = 1.1;
 
-fn spawn_player(mut commands: Commands) {
+fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Player
     commands
         .spawn(RigidBody::KinematicPositionBased)
@@ -62,7 +68,38 @@ fn spawn_player(mut commands: Commands) {
         .insert(CCAcceleration(Vec2::new(0., 0.)))
         .insert(CCVelocity(Vec2::new(0., 0.)))
         .insert(Player { jump_start: 0. })
-        .insert(InGameItem);
+        .insert(InGameItem)
+        .insert(SpriteBundle {
+            texture: asset_server.load("img/character/outline.png"),
+            sprite: Sprite {
+                color: Color::WHITE,
+                custom_size: Some(Vec2::new(4.0, 4.0)),
+                ..default()
+            },
+            ..default()
+        })
+        .with_children(|f| {
+            f.spawn(SpriteBundle {
+                texture: asset_server.load("img/character/body.png"),
+                sprite: Sprite {
+                    color: Color::RED,
+                    custom_size: Some(Vec2::new(4.0, 4.0)),
+                    ..default()
+                },
+                ..default()
+            });
+        })
+        .with_children(|f| {
+            f.spawn(SpriteBundle {
+                texture: asset_server.load("img/character/face_angry.png"),
+                sprite: Sprite {
+                    color: Color::WHITE,
+                    custom_size: Some(Vec2::new(4.0, 4.0)),
+                    ..default()
+                },
+                ..default()
+            });
+        });
 }
 
 fn player_movement(
