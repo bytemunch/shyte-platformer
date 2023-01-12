@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_parallax::{LayerData, ParallaxPlugin, ParallaxResource};
 
-const BG_SCALE: f32 = 1. / 20.; // magic number (:
+const BG_SCALE: f32 = 1. / 10.; // magic number (:
 
 pub struct BackgroundPlugin;
 
@@ -11,7 +11,7 @@ impl Plugin for BackgroundPlugin {
             layer_data: vec![LayerData {
                 speed: 0.,
                 path: "img/bg.png".to_string(),
-                tile_size: Vec2::new(9884., 2808.),
+                tile_size: Vec2::new(4992., 1404.),
                 cols: 1,
                 rows: 1,
                 scale: BG_SCALE,

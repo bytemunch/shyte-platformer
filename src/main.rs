@@ -19,7 +19,8 @@ use pause::PausePlugin;
 use player::PlayerPlugin;
 use states::StatesPlugin;
 
-// TODO: Reset camera on menu enter
+// TODO: look into every-other-flip for parallax plugin, do a PR
+
 // TODO after: enemy OR level loader
 // TODO later: Preload assets
 
