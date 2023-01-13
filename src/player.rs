@@ -43,16 +43,16 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-const CC_JUMP_ACCEL: f32 = 1.2;
+const CC_JUMP_ACCEL: f32 = 0.9;
 const CC_JUMP_MAX_DURATION: f32 = 1.;
 const CC_JUMP_FALLOFF_EXPONENT: f32 = 12.;
 const CC_GRAVITY: f32 = 0.3;
 
-const CC_WALK_SPEED: f32 = 2.3;
-const CC_WALK_ACCEL: f32 = 0.1;
+const CC_WALK_SPEED: f32 = 0.5;
+const CC_WALK_ACCEL: f32 = 0.05;
 const CC_FRICTION_COEFFICIENT: f32 = 1.1;
 
-const PLAYER_RADIUS: f32 = 4.;
+const PLAYER_RADIUS: f32 = 0.8;
 
 fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
@@ -175,8 +175,8 @@ fn camera_follow_player(
     // set camera translation to player translation
     for player_transform in &query {
         camera_transform.single_mut().translation = Vec3::new(
-            player_transform.translation().x + 50.,
-            -20.,
+            player_transform.translation().x + 20.,
+            0.,
             // player_transform.translation().y + 25.,
             0.,
         )

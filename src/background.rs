@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_parallax::{LayerData, ParallaxPlugin, ParallaxResource};
 
-const BG_SCALE: f32 = 1. / 10.; // magic number (:
+use crate::CAMERA_SCALE;
 
 pub struct BackgroundPlugin;
 
@@ -14,9 +14,9 @@ impl Plugin for BackgroundPlugin {
                 tile_size: Vec2::new(4992., 1404.),
                 cols: 1,
                 rows: 1,
-                scale: BG_SCALE,
+                scale: CAMERA_SCALE / 1.8,
                 z: 0.0,
-                position: Vec2::new(0., -20.),
+                position: Vec2::new(0., 0.),
                 ..Default::default()
             }],
             ..Default::default()

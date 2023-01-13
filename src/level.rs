@@ -18,7 +18,7 @@ fn setup_level(mut commands: Commands) {
     /* Create the ground. */
     commands
         .spawn(Collider::cuboid(500.0, 50.0))
-        .insert(TransformBundle::from(Transform::from_xyz(0.0, -100.0, 0.0)))
+        .insert(TransformBundle::from(Transform::from_xyz(0.0, -60.0, 0.0)))
         .insert(InGameItem);
 
     /* Create the bouncing ball. */

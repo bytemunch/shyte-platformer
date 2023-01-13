@@ -19,6 +19,8 @@ use pause::PausePlugin;
 use player::PlayerPlugin;
 use states::StatesPlugin;
 
+pub const CAMERA_SCALE: f32 = 1. / 24.;
+
 // TODO: look into every-other-flip for parallax plugin, do a PR
 
 // TODO after: enemy OR level loader
@@ -49,7 +51,7 @@ fn main() {
 
 fn setup_graphics(mut commands: Commands) {
     let projection = OrthographicProjection {
-        scale: 1. / 9.,
+        scale: CAMERA_SCALE,
         far: 11.,
         near: -11.,
         ..default()
@@ -59,7 +61,7 @@ fn setup_graphics(mut commands: Commands) {
     commands
         .spawn(Camera2dBundle {
             projection,
-            transform: Transform::from_xyz(0.0, -20.0, 0.0),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         })
         // parallax
