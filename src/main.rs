@@ -4,6 +4,7 @@ mod level;
 mod pause;
 mod player;
 mod states;
+mod static_enemy;
 mod util;
 
 use background::BackgroundPlugin;
@@ -29,6 +30,11 @@ pub const CAMERA_SCALE: f32 = 1. / 24.;
 #[derive(Component)]
 pub struct InGameItem;
 
+#[derive(Component)]
+pub struct TextureHandles {
+    body: Handle<Image>,
+}
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -47,6 +53,14 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
         .add_plugin(RapierDebugRenderPlugin::default())
         .run();
+}
+
+fn load_textures(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn(TextureHandles {
+        body: asset_server.load("img/character/body.png"),
+    });
+
+    // TODO create TextureHandles struct and insert as resource
 }
 
 fn setup_graphics(mut commands: Commands) {

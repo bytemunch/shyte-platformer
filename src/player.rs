@@ -52,7 +52,7 @@ const CC_WALK_SPEED: f32 = 0.5;
 const CC_WALK_ACCEL: f32 = 0.05;
 const CC_FRICTION_COEFFICIENT: f32 = 1.1;
 
-const PLAYER_RADIUS: f32 = 0.8;
+pub const PLAYER_RADIUS: f32 = 0.8;
 
 fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
