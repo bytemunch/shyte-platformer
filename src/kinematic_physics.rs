@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+use crate::SystemOrderLabel;
+
 pub const CC_GRAVITY: f32 = 0.1;
 pub const CC_WALK_SPEED: f32 = 0.3;
 pub const CC_FRICTION_COEFFICIENT: f32 = 1.2;
@@ -19,24 +21,25 @@ pub struct KinematicPhysics;
 impl Plugin for KinematicPhysics {
     fn build(&self, app: &mut App) {
         app // kinematic systems
-            .add_system(
-                kinematic_clear_acceleration
-                    .before(kinematic_gravity)
-                    .before(kinematic_apply_friction),
-            )
-            .add_system(kinematic_gravity)
-            .add_system(kinematic_apply_friction)
-            .add_system(
-                kinematic_set_velocity
-                    .after(kinematic_gravity)
-                    .after(kinematic_apply_friction),
-            )
-            .add_system(
-                kinematic_max_speed
-                    .after(kinematic_set_velocity)
-                    .before(kinematic_apply_velocity),
-            )
-            .add_system(kinematic_apply_velocity.after(kinematic_set_velocity));
+            .add_system(kinematic_clear_acceleration.before(SystemOrderLabel::Input))
+            .add_system_set(
+                SystemSet::new()
+                    .label(SystemOrderLabel::Movement)
+                    .with_system(kinematic_gravity)
+                    .with_system(kinematic_apply_friction)
+                    .with_system(
+                        kinematic_set_velocity
+                            .after(kinematic_gravity)
+                            .after(kinematic_apply_friction),
+                    )
+                    .with_system(
+                        kinematic_max_speed
+                            .after(kinematic_set_velocity)
+                            .before(kinematic_apply_velocity),
+                    )
+                    .with_system(kinematic_apply_velocity.after(kinematic_set_velocity))
+                    .after(SystemOrderLabel::Input),
+            );
     }
 }
 

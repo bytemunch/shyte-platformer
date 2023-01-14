@@ -6,8 +6,9 @@ use iyes_loopless::{
 };
 
 use crate::{
+    kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity},
     states::{GameState, PauseState},
-    InGameItem, TextureHandles, kinematic_physics::{KinematicGravity, CCVelocity, CCAcceleration},
+    InGameItem, TextureHandles, SystemOrderLabel,
 };
 
 #[derive(Component)]
@@ -27,7 +28,7 @@ impl Plugin for PlayerPlugin {
         .add_system(
             player_movement
                 .run_in_state(GameState::InGame)
-                .run_in_state(PauseState::Running),
+                .run_in_state(PauseState::Running).label(SystemOrderLabel::Input),
         )
         .add_system(
             player_fall_out
@@ -42,8 +43,6 @@ const PLAYER_JUMP_ACCEL: f32 = 0.4;
 const PLAYER_JUMP_MAX_DURATION: f32 = 1.;
 const PLAYER_JUMP_FALLOFF_EXPONENT: f32 = 12.;
 const PLAYER_WALK_ACCEL: f32 = 0.05;
-
-
 
 pub const PLAYER_RADIUS: f32 = 0.8;
 
@@ -107,7 +106,7 @@ fn player_movement(
         &mut Player,
     )>,
 ) {
-    for ( output, mut acc,  mut player) in &mut player_info {
+    for (output, mut acc, mut player) in &mut player_info {
         let up_start = keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
         let up_held = keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
         // let down = keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]);
