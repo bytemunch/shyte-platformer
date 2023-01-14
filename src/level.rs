@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use iyes_loopless::prelude::AppLooplessStateExt;
 
-use crate::{states::GameState, static_enemy::spawn_static_enemy, util::despawn_with, InGameItem};
+use crate::{states::GameState, static_enemy::spawn_static_enemy, util::despawn_with, InGameItem, TextureHandles};
 pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
@@ -14,7 +14,7 @@ impl Plugin for LevelPlugin {
     }
 }
 
-fn setup_level(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_level(mut commands: Commands, texture_handles: Res<TextureHandles>) {
     /* Create the ground. */
     commands
         .spawn(Collider::cuboid(500.0, 50.0))
@@ -31,8 +31,8 @@ fn setup_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         )))
         .insert(InGameItem);
     // enemy
-    spawn_static_enemy(&mut commands, &asset_server, Vec3::new(10.0, 0.0, 10.0));
-    spawn_static_enemy(&mut commands, &asset_server, Vec3::new(5.0, 0.0, 10.0));
+    spawn_static_enemy(&mut commands, &texture_handles, Vec3::new(10.0, 0.0, 10.0));
+    spawn_static_enemy(&mut commands, &texture_handles, Vec3::new(5.0, 0.0, 10.0));
 }
 
 fn despawn_level(commands: Commands, query: Query<Entity, With<InGameItem>>) {

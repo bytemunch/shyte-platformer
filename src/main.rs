@@ -17,7 +17,9 @@ use bevy_parallax::ParallaxCameraComponent;
 use interfaces::UserInterfacesPlugin;
 use level::LevelPlugin;
 use pause::PausePlugin;
-use player::PlayerPlugin;
+use player::{
+    CCAcceleration, CCVelocity, PlayerPlugin, CC_FRICTION_COEFFICIENT, CC_GRAVITY, CC_WALK_SPEED,
+};
 use states::StatesPlugin;
 
 pub const CAMERA_SCALE: f32 = 1. / 24.;
@@ -25,9 +27,7 @@ pub const CAMERA_SCALE: f32 = 1. / 24.;
 // TODO: look into every-other-flip for parallax plugin, do a PR
 
 // TODO: Platform graphics
-// TODO: Preload assets
 // TODO: enemy collision, attack and die
-// TODO: enemy gravity
 // TODO: level loader
 // TODO: enemy "ha ha" particle effects
 // TODO: animate chalk
@@ -39,8 +39,14 @@ pub const CAMERA_SCALE: f32 = 1. / 24.;
 pub struct InGameItem;
 
 #[derive(Component)]
+pub struct KinematicGravity;
+
+#[derive(Resource)]
 pub struct TextureHandles {
-    body: Handle<Image>,
+    char_body: Handle<Image>,
+    char_outline: Handle<Image>,
+    char_face_angry: Handle<Image>,
+    char_face_laughing: Handle<Image>,
 }
 
 fn main() {
@@ -49,7 +55,27 @@ fn main() {
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // setup
+        .add_startup_system(load_textures)
         .add_startup_system(setup_graphics)
+        // kinematic systems
+        .add_system(
+            kinematic_clear_acceleration
+                .before(kinematic_gravity)
+                .before(kinematic_apply_friction),
+        )
+        .add_system(kinematic_gravity)
+        .add_system(kinematic_apply_friction)
+        .add_system(
+            kinematic_set_velocity
+                .after(kinematic_gravity)
+                .after(kinematic_apply_friction),
+        )
+        .add_system(
+            kinematic_max_speed
+                .after(kinematic_set_velocity)
+                .before(kinematic_apply_velocity),
+        )
+        .add_system(kinematic_apply_velocity.after(kinematic_set_velocity))
         // my plugins
         .add_plugin(BackgroundPlugin)
         .add_plugin(StatesPlugin)
@@ -64,11 +90,12 @@ fn main() {
 }
 
 fn load_textures(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(TextureHandles {
-        body: asset_server.load("img/character/body.png"),
+    commands.insert_resource(TextureHandles {
+        char_body: asset_server.load("img/character/body.png"),
+        char_outline: asset_server.load("img/character/outline.png"),
+        char_face_angry: asset_server.load("img/character/face_angry.png"),
+        char_face_laughing: asset_server.load("img/character/face_laughing.png"),
     });
-
-    // TODO create TextureHandles struct and insert as resource
 }
 
 fn setup_graphics(mut commands: Commands) {
@@ -88,4 +115,62 @@ fn setup_graphics(mut commands: Commands) {
         })
         // parallax
         .insert(ParallaxCameraComponent);
+}
+
+fn kinematic_gravity(
+    mut query: Query<
+        (
+            &mut CCAcceleration,
+            &mut CCVelocity,
+            &KinematicCharacterControllerOutput,
+        ),
+        With<KinematicGravity>,
+    >,
+) {
+    for (mut acc, mut vel, output) in &mut query {
+        if !output.grounded {
+            acc.0.y -= CC_GRAVITY;
+        }
+
+        if output.grounded && vel.0.y < 0. {
+            vel.0.y = 0.;
+            acc.0.y = 0.;
+        }
+    }
+}
+
+fn kinematic_apply_friction(mut query: Query<&mut CCVelocity>) {
+    for mut vel in &mut query {
+        vel.0.x /= CC_FRICTION_COEFFICIENT;
+    }
+}
+
+fn kinematic_clear_acceleration(mut query: Query<&mut CCAcceleration>) {
+    for mut acc in &mut query {
+        acc.0 = Vec2::new(0.0, 0.0);
+    }
+}
+
+fn kinematic_set_velocity(mut query: Query<(&CCAcceleration, &mut CCVelocity)>) {
+    for (acc, mut vel) in &mut query {
+        vel.0 += acc.0;
+    }
+}
+
+fn kinematic_apply_velocity(mut query: Query<(&mut KinematicCharacterController, &CCVelocity)>) {
+    for (mut controller, vel) in &mut query {
+        controller.translation = Some(vel.0);
+    }
+}
+
+fn kinematic_max_speed(mut query: Query<&mut CCVelocity>) {
+    for mut vel in &mut query {
+        if vel.0.x > CC_WALK_SPEED {
+            vel.0.x = CC_WALK_SPEED;
+        }
+
+        if vel.0.x < -CC_WALK_SPEED {
+            vel.0.x = -CC_WALK_SPEED;
+        }
+    }
 }

@@ -7,7 +7,7 @@ use iyes_loopless::{
 
 use crate::{
     states::{GameState, PauseState},
-    InGameItem,
+    InGameItem, TextureHandles, KinematicGravity,
 };
 
 #[derive(Component)]
@@ -16,10 +16,10 @@ struct Player {
 }
 
 #[derive(Component)]
-struct CCAcceleration(Vec2);
+pub struct CCAcceleration(pub Vec2);
 
 #[derive(Component)]
-struct CCVelocity(Vec2);
+pub struct CCVelocity(pub Vec2);
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
@@ -46,15 +46,15 @@ impl Plugin for PlayerPlugin {
 const CC_JUMP_ACCEL: f32 = 0.4;
 const CC_JUMP_MAX_DURATION: f32 = 1.;
 const CC_JUMP_FALLOFF_EXPONENT: f32 = 12.;
-const CC_GRAVITY: f32 = 0.1;
+pub const CC_GRAVITY: f32 = 0.1;
 
-const CC_WALK_SPEED: f32 = 0.3;
+pub const CC_WALK_SPEED: f32 = 0.3;
 const CC_WALK_ACCEL: f32 = 0.05;
-const CC_FRICTION_COEFFICIENT: f32 = 1.2;
+pub const CC_FRICTION_COEFFICIENT: f32 = 1.2;
 
 pub const PLAYER_RADIUS: f32 = 0.8;
 
-fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_player(mut commands: Commands, texture_handles: Res<TextureHandles>) {
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
     // Player
     commands
@@ -67,10 +67,11 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         })
         .insert(CCAcceleration(Vec2::new(0., 0.)))
         .insert(CCVelocity(Vec2::new(0., 0.)))
+        .insert(KinematicGravity)
         .insert(Player { jump_start: 0. })
         .insert(InGameItem)
         .insert(SpriteBundle {
-            texture: asset_server.load("img/character/outline.png"),
+            texture: texture_handles.char_outline.clone(),
             sprite: Sprite {
                 color: Color::WHITE,
                 custom_size: sprite_size,
@@ -81,7 +82,7 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         })
         .with_children(|f| {
             f.spawn(SpriteBundle {
-                texture: asset_server.load("img/character/body.png"),
+                texture: texture_handles.char_body.clone(),
                 sprite: Sprite {
                     color: Color::RED,
                     custom_size: sprite_size,
@@ -93,7 +94,7 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         })
         .with_children(|f| {
             f.spawn(SpriteBundle {
-                texture: asset_server.load("img/character/face_angry.png"),
+                texture: texture_handles.char_face_angry.clone(),
                 sprite: Sprite {
                     color: Color::WHITE,
                     custom_size: sprite_size,
@@ -108,19 +109,12 @@ fn player_movement(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut player_info: Query<(
-        &mut KinematicCharacterController,
         &KinematicCharacterControllerOutput,
         &mut CCAcceleration,
-        &mut CCVelocity,
         &mut Player,
     )>,
 ) {
-    for (mut controller, output, mut acc, mut vel, mut player) in &mut player_info {
-        // friction
-        // if output.grounded {
-        vel.0.x /= CC_FRICTION_COEFFICIENT;
-        // }
-
+    for ( output, mut acc,  mut player) in &mut player_info {
         let up_start = keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
         let up_held = keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
         // let down = keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]);
@@ -129,7 +123,7 @@ fn player_movement(
 
         let x_axis = (-(left as i8) + right as i8) as f32 * CC_WALK_ACCEL;
 
-        let mut y_axis = if up_start && output.grounded {
+        let y_axis = if up_start && output.grounded {
             // JUMP
             player.jump_start = time.elapsed_seconds();
             CC_JUMP_ACCEL
@@ -141,30 +135,7 @@ fn player_movement(
             0.
         };
 
-        if !output.grounded {
-            y_axis -= CC_GRAVITY;
-        }
-
-        acc.0 = Vec2::new(x_axis, y_axis);
-
-        if output.grounded && vel.0.y < 0. {
-            vel.0.y = 0.;
-            acc.0.y = 0.;
-        }
-
-        vel.0 += acc.0;
-
-        if vel.0.x > CC_WALK_SPEED {
-            vel.0.x = CC_WALK_SPEED;
-        }
-
-        if vel.0.x < -CC_WALK_SPEED {
-            vel.0.x = -CC_WALK_SPEED;
-        }
-
-        // println!("V: {:?} | A: {:?}", vel.0, acc.0);
-
-        controller.translation = Some(vel.0);
+        acc.0 += Vec2::new(x_axis, y_axis);
     }
 }
 
