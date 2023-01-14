@@ -24,8 +24,16 @@ pub const CAMERA_SCALE: f32 = 1. / 24.;
 
 // TODO: look into every-other-flip for parallax plugin, do a PR
 
-// TODO after: enemy OR level loader
-// TODO later: Preload assets
+// TODO: Platform graphics
+// TODO: Preload assets
+// TODO: enemy collision, attack and die
+// TODO: enemy gravity
+// TODO: level loader
+// TODO: enemy "ha ha" particle effects
+// TODO: animate chalk
+// TODO: moving enemies, a la goomba
+// TODO: enemies die when past deathplane
+// TODO: deathplane as pub const
 
 #[derive(Component)]
 pub struct InGameItem;

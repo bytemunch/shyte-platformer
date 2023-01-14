@@ -43,14 +43,14 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-const CC_JUMP_ACCEL: f32 = 0.9;
+const CC_JUMP_ACCEL: f32 = 0.4;
 const CC_JUMP_MAX_DURATION: f32 = 1.;
 const CC_JUMP_FALLOFF_EXPONENT: f32 = 12.;
-const CC_GRAVITY: f32 = 0.3;
+const CC_GRAVITY: f32 = 0.1;
 
-const CC_WALK_SPEED: f32 = 0.5;
+const CC_WALK_SPEED: f32 = 0.3;
 const CC_WALK_ACCEL: f32 = 0.05;
-const CC_FRICTION_COEFFICIENT: f32 = 1.1;
+const CC_FRICTION_COEFFICIENT: f32 = 1.2;
 
 pub const PLAYER_RADIUS: f32 = 0.8;
 
