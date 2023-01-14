@@ -7,7 +7,7 @@ use iyes_loopless::{
 
 use crate::{
     states::{GameState, PauseState},
-    InGameItem, TextureHandles, KinematicGravity,
+    InGameItem, TextureHandles, kinematic_physics::{KinematicGravity, CCVelocity, CCAcceleration},
 };
 
 #[derive(Component)]
@@ -15,11 +15,6 @@ struct Player {
     jump_start: f32,
 }
 
-#[derive(Component)]
-pub struct CCAcceleration(pub Vec2);
-
-#[derive(Component)]
-pub struct CCVelocity(pub Vec2);
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
@@ -43,14 +38,12 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-const CC_JUMP_ACCEL: f32 = 0.4;
-const CC_JUMP_MAX_DURATION: f32 = 1.;
-const CC_JUMP_FALLOFF_EXPONENT: f32 = 12.;
-pub const CC_GRAVITY: f32 = 0.1;
+const PLAYER_JUMP_ACCEL: f32 = 0.4;
+const PLAYER_JUMP_MAX_DURATION: f32 = 1.;
+const PLAYER_JUMP_FALLOFF_EXPONENT: f32 = 12.;
+const PLAYER_WALK_ACCEL: f32 = 0.05;
 
-pub const CC_WALK_SPEED: f32 = 0.3;
-const CC_WALK_ACCEL: f32 = 0.05;
-pub const CC_FRICTION_COEFFICIENT: f32 = 1.2;
+
 
 pub const PLAYER_RADIUS: f32 = 0.8;
 
@@ -121,16 +114,16 @@ fn player_movement(
         let left = keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]);
         let right = keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]);
 
-        let x_axis = (-(left as i8) + right as i8) as f32 * CC_WALK_ACCEL;
+        let x_axis = (-(left as i8) + right as i8) as f32 * PLAYER_WALK_ACCEL;
 
         let y_axis = if up_start && output.grounded {
             // JUMP
             player.jump_start = time.elapsed_seconds();
-            CC_JUMP_ACCEL
-        } else if up_held && time.elapsed_seconds() - CC_JUMP_MAX_DURATION < player.jump_start {
-            CC_JUMP_ACCEL
-                * (1. - (time.elapsed_seconds() - player.jump_start) / CC_JUMP_MAX_DURATION)
-                    .powf(CC_JUMP_FALLOFF_EXPONENT)
+            PLAYER_JUMP_ACCEL
+        } else if up_held && time.elapsed_seconds() - PLAYER_JUMP_MAX_DURATION < player.jump_start {
+            PLAYER_JUMP_ACCEL
+                * (1. - (time.elapsed_seconds() - player.jump_start) / PLAYER_JUMP_MAX_DURATION)
+                    .powf(PLAYER_JUMP_FALLOFF_EXPONENT)
         } else {
             0.
         };

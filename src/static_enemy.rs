@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{player::{PLAYER_RADIUS, CCAcceleration, CCVelocity}, InGameItem, TextureHandles, KinematicGravity};
+use crate::{player::PLAYER_RADIUS, InGameItem, TextureHandles, kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity}};
 
 #[derive(Component)]
 struct StaticEnemy;

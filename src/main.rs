@@ -1,5 +1,6 @@
 mod background;
 mod interfaces;
+mod kinematic_physics;
 mod level;
 mod pause;
 mod player;
@@ -15,17 +16,17 @@ use bevy_rapier2d::prelude::*;
 use bevy_parallax::ParallaxCameraComponent;
 
 use interfaces::UserInterfacesPlugin;
+use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
 use pause::PausePlugin;
-use player::{
-    CCAcceleration, CCVelocity, PlayerPlugin, CC_FRICTION_COEFFICIENT, CC_GRAVITY, CC_WALK_SPEED,
-};
+use player::PlayerPlugin;
 use states::StatesPlugin;
 
 pub const CAMERA_SCALE: f32 = 1. / 24.;
 
 // TODO: look into every-other-flip for parallax plugin, do a PR
 
+// TODO: base enemy bundle
 // TODO: Platform graphics
 // TODO: enemy collision, attack and die
 // TODO: level loader
@@ -37,9 +38,6 @@ pub const CAMERA_SCALE: f32 = 1. / 24.;
 
 #[derive(Component)]
 pub struct InGameItem;
-
-#[derive(Component)]
-pub struct KinematicGravity;
 
 #[derive(Resource)]
 pub struct TextureHandles {
@@ -57,25 +55,6 @@ fn main() {
         // setup
         .add_startup_system(load_textures)
         .add_startup_system(setup_graphics)
-        // kinematic systems
-        .add_system(
-            kinematic_clear_acceleration
-                .before(kinematic_gravity)
-                .before(kinematic_apply_friction),
-        )
-        .add_system(kinematic_gravity)
-        .add_system(kinematic_apply_friction)
-        .add_system(
-            kinematic_set_velocity
-                .after(kinematic_gravity)
-                .after(kinematic_apply_friction),
-        )
-        .add_system(
-            kinematic_max_speed
-                .after(kinematic_set_velocity)
-                .before(kinematic_apply_velocity),
-        )
-        .add_system(kinematic_apply_velocity.after(kinematic_set_velocity))
         // my plugins
         .add_plugin(BackgroundPlugin)
         .add_plugin(StatesPlugin)
@@ -83,6 +62,7 @@ fn main() {
         .add_plugin(PlayerPlugin)
         .add_plugin(PausePlugin)
         .add_plugin(LevelPlugin)
+        .add_plugin(KinematicPhysics)
         // physics
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
         .add_plugin(RapierDebugRenderPlugin::default())
@@ -115,62 +95,4 @@ fn setup_graphics(mut commands: Commands) {
         })
         // parallax
         .insert(ParallaxCameraComponent);
-}
-
-fn kinematic_gravity(
-    mut query: Query<
-        (
-            &mut CCAcceleration,
-            &mut CCVelocity,
-            &KinematicCharacterControllerOutput,
-        ),
-        With<KinematicGravity>,
-    >,
-) {
-    for (mut acc, mut vel, output) in &mut query {
-        if !output.grounded {
-            acc.0.y -= CC_GRAVITY;
-        }
-
-        if output.grounded && vel.0.y < 0. {
-            vel.0.y = 0.;
-            acc.0.y = 0.;
-        }
-    }
-}
-
-fn kinematic_apply_friction(mut query: Query<&mut CCVelocity>) {
-    for mut vel in &mut query {
-        vel.0.x /= CC_FRICTION_COEFFICIENT;
-    }
-}
-
-fn kinematic_clear_acceleration(mut query: Query<&mut CCAcceleration>) {
-    for mut acc in &mut query {
-        acc.0 = Vec2::new(0.0, 0.0);
-    }
-}
-
-fn kinematic_set_velocity(mut query: Query<(&CCAcceleration, &mut CCVelocity)>) {
-    for (acc, mut vel) in &mut query {
-        vel.0 += acc.0;
-    }
-}
-
-fn kinematic_apply_velocity(mut query: Query<(&mut KinematicCharacterController, &CCVelocity)>) {
-    for (mut controller, vel) in &mut query {
-        controller.translation = Some(vel.0);
-    }
-}
-
-fn kinematic_max_speed(mut query: Query<&mut CCVelocity>) {
-    for mut vel in &mut query {
-        if vel.0.x > CC_WALK_SPEED {
-            vel.0.x = CC_WALK_SPEED;
-        }
-
-        if vel.0.x < -CC_WALK_SPEED {
-            vel.0.x = -CC_WALK_SPEED;
-        }
-    }
 }
