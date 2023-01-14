@@ -5,7 +5,7 @@ mod level;
 mod pause;
 mod player;
 mod states;
-mod static_enemy;
+mod enemy;
 mod util;
 
 use background::BackgroundPlugin;
@@ -26,7 +26,6 @@ pub const CAMERA_SCALE: f32 = 1. / 24.;
 
 // TODO: look into every-other-flip for parallax plugin, do a PR
 
-// TODO: base enemy bundle
 // TODO: Platform graphics
 // TODO: enemy collision, attack and die
 // TODO: level loader

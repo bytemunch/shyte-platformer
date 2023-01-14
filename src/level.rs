@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use iyes_loopless::prelude::AppLooplessStateExt;
 
-use crate::{states::GameState, static_enemy::spawn_static_enemy, util::despawn_with, InGameItem, TextureHandles};
+use crate::{states::GameState, enemy::spawn_static_enemy, util::despawn_with, InGameItem, TextureHandles};
 pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
