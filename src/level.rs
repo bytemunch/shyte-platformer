@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use bevy::{prelude::*, render::mesh::VertexAttributeValues, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 use iyes_loopless::prelude::AppLooplessStateExt;
@@ -16,51 +18,170 @@ impl Plugin for LevelPlugin {
     }
 }
 
-fn setup_level(
-    mut commands: Commands,
-    texture_handles: Res<TextureHandles>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    images: ResMut<Assets<Image>>,
-) {
-    if let Some(cl) = images.get(&texture_handles.chalk_line_horizontal) {
-        println!("{:?}", cl.sampler_descriptor)
+#[derive(Component)]
+struct BoxTopLeft(Vec2);
+
+#[derive(Component)]
+struct BoxBottomRight(Vec2);
+
+#[derive(Bundle)]
+struct BoxBundle {
+    tl: BoxTopLeft,
+    br: BoxBottomRight,
+    collider: Collider,
+    transform_bundle: TransformBundle,
+
+    _igi: InGameItem,
+    _vb: VisibilityBundle,
+}
+
+impl Default for BoxBundle {
+    fn default() -> Self {
+        Self {
+            tl: BoxTopLeft(Vec2::new(-5.0, -5.0)),
+            br: BoxBottomRight(Vec2::new(5.0, 5.0)),
+            collider: Collider::cuboid(5.0, 5.0),
+            transform_bundle: TransformBundle::from_transform(Transform::from_xyz(0.0, 0.0, 0.0)),
+
+            _igi: InGameItem,
+            _vb: VisibilityBundle {
+                visibility: Visibility::VISIBLE,
+                ..default()
+            },
+        }
     }
+}
 
-    const LEN: f32 = 10.;
+//helper
+// TODO overload for Pos/Size style, to learn overloading
+pub fn create_box(
+    commands: &mut Commands,
+    tl: Vec2,
+    br: Vec2,
+    texture_handles: &Res<TextureHandles>,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+) -> Entity {
+    let w = (br.x - tl.x).abs();
+    let h = (br.y - tl.y).abs();
 
-    let mut mesh = Mesh::from(shape::Quad::new(Vec2::new(LEN, 2.5)));
+    let hx = w / 2.;
+    let hy = h / 2.;
 
-    if let Some(VertexAttributeValues::Float32x2(uvs)) = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0) {
+    let cx = (br.x - tl.x) / 2.;
+    let cy = (br.y - tl.y) / 2.;
+
+    const UV_MAGIC_NUMBER: f32 = 32.;
+
+    let mut x_mesh = Mesh::from(shape::Quad::new(Vec2::new(w, 2.5)));
+    let mut y_mesh = Mesh::from(shape::Quad::new(Vec2::new(h, 2.5)));
+
+    if let Some(VertexAttributeValues::Float32x2(uvs)) = x_mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0)
+    {
         for uv in uvs {
-            uv[0] *= 16. * LEN / 10.; // WHY DOES THIS WORK??????
+            uv[0] *= 16. * w / UV_MAGIC_NUMBER; // WHY DOES THIS WORK??????
             uv[1] *= 4.;
         }
     }
 
-    /* Create the ground. */
+    if let Some(VertexAttributeValues::Float32x2(uvs)) = y_mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0)
+    {
+        for uv in uvs {
+            uv[1] *= 4.;
+            uv[0] *= 16. * h / UV_MAGIC_NUMBER;
+        }
+    }
+
     commands
-        .spawn(Collider::cuboid(5.0, 5.0))
-        .insert(InGameItem)
-        .insert(VisibilityBundle {
-            visibility: Visibility::VISIBLE,
+        .spawn(BoxBundle {
+            tl: BoxTopLeft(tl),
+            br: BoxBottomRight(br),
+            collider: Collider::cuboid(w / 2., h / 2.),
+            transform_bundle: TransformBundle::from_transform(Transform::from_xyz(
+                tl.x + cx,
+                tl.y + cy,
+                10.,
+            )),
             ..default()
         })
-        .insert(TransformBundle::from_transform(Transform::from_xyz(
-            0.0, -9.0, 10.0,
-        )))
         .with_children(|cb| {
+            // TOP
             cb.spawn(MaterialMesh2dBundle {
-                mesh: meshes.add(mesh.into()).into(),
+                mesh: meshes.add(x_mesh.clone().into()).into(),
                 visibility: Visibility::VISIBLE,
-                transform: Transform::from_xyz(0.0, 4.0, 0.0),
+                transform: Transform::from_xyz(0.0, hy - 1., 0.0),
                 material: materials.add(ColorMaterial {
                     texture: Some(texture_handles.chalk_line_horizontal.clone()),
                     ..default()
                 }),
                 ..default()
             });
-        });
+            // LEFT
+            cb.spawn(MaterialMesh2dBundle {
+                mesh: meshes.add(y_mesh.clone().into()).into(),
+                visibility: Visibility::VISIBLE,
+                transform: Transform::from_xyz(-hx + 1., 0.0, 0.0)
+                    .with_rotation(Quat::from_rotation_z(PI / 2.)),
+                material: materials.add(ColorMaterial {
+                    texture: Some(texture_handles.chalk_line_horizontal.clone()),
+                    ..default()
+                }),
+                ..default()
+            });
+            // RIGHT
+            cb.spawn(MaterialMesh2dBundle {
+                mesh: meshes.add(y_mesh.clone().into()).into(),
+                visibility: Visibility::VISIBLE,
+                transform: Transform::from_xyz(hx - 1., 0.0, 0.0)
+                    .with_rotation(Quat::from_rotation_z(-PI / 2.)),
+                material: materials.add(ColorMaterial {
+                    texture: Some(texture_handles.chalk_line_horizontal.clone()),
+                    ..default()
+                }),
+                ..default()
+            });
+            // BOTTOM
+            cb.spawn(MaterialMesh2dBundle {
+                mesh: meshes.add(x_mesh.clone().into()).into(),
+                visibility: Visibility::VISIBLE,
+                transform: Transform::from_xyz(0.0, -hy + 1., 0.0)
+                    .with_rotation(Quat::from_rotation_z(PI)),
+                material: materials.add(ColorMaterial {
+                    texture: Some(texture_handles.chalk_line_horizontal.clone()),
+                    ..default()
+                }),
+                ..default()
+            });
+        })
+        .id()
+}
+
+fn setup_level(
+    mut commands: Commands,
+    texture_handles: Res<TextureHandles>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+
+    const FLOOR_0:f32 = -5.;
+    const FLOOR_0_BOTTOM:f32 = -10.;
+    create_box(
+        &mut commands,
+        Vec2::new(0., FLOOR_0),
+        Vec2::new(15., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    create_box(
+        &mut commands,
+        Vec2::new(20., FLOOR_0),
+        Vec2::new(30., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
 
     /* Create the bouncing ball. */
     commands

@@ -56,13 +56,13 @@ struct Enemy;
 // }
 
 pub fn spawn_static_enemy(
-    cb: &mut Commands,
+    commands: &mut Commands,
     texture_handles: &TextureHandles,
     position: Vec3,
 ) -> Entity {
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
     // Enemy
-    cb.spawn(EnemyBundle {
+    commands.spawn(EnemyBundle {
         sprite_bundle: SpriteBundle {
             texture: texture_handles.char_outline.clone(),
             sprite: Sprite {
