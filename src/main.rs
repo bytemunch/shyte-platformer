@@ -26,9 +26,8 @@ use states::StatesPlugin;
 
 pub const CAMERA_SCALE: f32 = 1. / 24.;
 
-// TODO: look into every-other-flip for parallax plugin, do a PR
-
-// TODO: more platform graphics
+// TODO: bundled entity child bundles, for childbuilder.spawn(ChildBundle::default())
+//       like enemy/player child spritebundle bundle
 // TODO: enemy collision, attack and die
 // TODO: level loader
 // TODO: enemy "ha ha" particle effects
@@ -36,6 +35,7 @@ pub const CAMERA_SCALE: f32 = 1. / 24.;
 // TODO: moving enemies, a la goomba
 // TODO: enemies die when past deathplane
 // TODO: deathplane as pub const
+// TODO: coyote time
 
 #[derive(Component)]
 pub struct InGameItem;

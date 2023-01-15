@@ -44,10 +44,7 @@ impl Default for BoxBundle {
             transform_bundle: TransformBundle::from_transform(Transform::from_xyz(0.0, 0.0, 0.0)),
 
             _igi: InGameItem,
-            _vb: VisibilityBundle {
-                visibility: Visibility::VISIBLE,
-                ..default()
-            },
+            _vb: VisibilityBundle::default(),
         }
     }
 }
@@ -108,7 +105,6 @@ pub fn create_box(
             // TOP
             cb.spawn(MaterialMesh2dBundle {
                 mesh: meshes.add(x_mesh.clone().into()).into(),
-                visibility: Visibility::VISIBLE,
                 transform: Transform::from_xyz(0.0, hy - 1., 0.0),
                 material: materials.add(ColorMaterial {
                     texture: Some(texture_handles.chalk_line_horizontal.clone()),
@@ -119,7 +115,6 @@ pub fn create_box(
             // LEFT
             cb.spawn(MaterialMesh2dBundle {
                 mesh: meshes.add(y_mesh.clone().into()).into(),
-                visibility: Visibility::VISIBLE,
                 transform: Transform::from_xyz(-hx + 1., 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_z(PI / 2.)),
                 material: materials.add(ColorMaterial {
@@ -131,7 +126,6 @@ pub fn create_box(
             // RIGHT
             cb.spawn(MaterialMesh2dBundle {
                 mesh: meshes.add(y_mesh.clone().into()).into(),
-                visibility: Visibility::VISIBLE,
                 transform: Transform::from_xyz(hx - 1., 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_z(-PI / 2.)),
                 material: materials.add(ColorMaterial {
@@ -143,7 +137,6 @@ pub fn create_box(
             // BOTTOM
             cb.spawn(MaterialMesh2dBundle {
                 mesh: meshes.add(x_mesh.clone().into()).into(),
-                visibility: Visibility::VISIBLE,
                 transform: Transform::from_xyz(0.0, -hy + 1., 0.0)
                     .with_rotation(Quat::from_rotation_z(PI)),
                 material: materials.add(ColorMaterial {
@@ -162,9 +155,8 @@ fn setup_level(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-
-    const FLOOR_0:f32 = -5.;
-    const FLOOR_0_BOTTOM:f32 = -10.;
+    const FLOOR_0: f32 = -5.;
+    const FLOOR_0_BOTTOM: f32 = -10.;
     create_box(
         &mut commands,
         Vec2::new(0., FLOOR_0),

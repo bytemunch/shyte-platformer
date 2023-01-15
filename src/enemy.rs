@@ -14,8 +14,9 @@ struct EnemyBundle {
     pub controller: KinematicCharacterController,
     pub velocity: CCVelocity,
     pub acceleration: CCAcceleration,
-    pub sprite_bundle: SpriteBundle,
+    pub transform_bundle: TransformBundle,
 
+    _vb: VisibilityBundle,
     _kg: KinematicGravity,
     _e: Enemy,
     _igi: InGameItem,
@@ -30,9 +31,11 @@ impl Default for EnemyBundle {
                 apply_impulse_to_dynamic_bodies: true,
                 ..default()
             },
+            transform_bundle: TransformBundle::from_transform(Transform::from_xyz(0., 0., 10.)),
             velocity: CCVelocity(Vec2::new(0.0, 0.0)),
             acceleration: CCAcceleration(Vec2::new(0.0, 0.0)),
-            sprite_bundle: SpriteBundle { ..default() },
+
+            _vb:VisibilityBundle::default(),
             _e: Enemy,
             _kg: KinematicGravity,
             _igi: InGameItem,
@@ -62,41 +65,40 @@ pub fn spawn_static_enemy(
 ) -> Entity {
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
     // Enemy
-    commands.spawn(EnemyBundle {
-        sprite_bundle: SpriteBundle {
-            texture: texture_handles.char_outline.clone(),
-            sprite: Sprite {
-                color: Color::WHITE,
-                custom_size: sprite_size,
+    commands
+        .spawn(EnemyBundle { 
+            transform_bundle: TransformBundle::from_transform(Transform::from_translation(position)),
+            ..default() })
+        .with_children(|cb| {
+            cb.spawn(SpriteBundle {
+                texture: texture_handles.char_outline.clone(),
+                sprite: Sprite {
+                    color: Color::WHITE,
+                    custom_size: sprite_size,
+                    ..default()
+                },
                 ..default()
-            },
-            transform: Transform::from_translation(position),
-            ..default()
-        },
-        ..default()
-    })
-    .with_children(|f| {
-        f.spawn(SpriteBundle {
-            texture: texture_handles.char_body.clone(),
-            sprite: Sprite {
-                color: Color::BLUE,
-                custom_size: sprite_size,
+            });
+
+            cb.spawn(SpriteBundle {
+                texture: texture_handles.char_body.clone(),
+                sprite: Sprite {
+                    color: Color::BLUE,
+                    custom_size: sprite_size,
+                    ..default()
+                },
                 ..default()
-            },
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..default()
-        });
-    })
-    .with_children(|f| {
-        f.spawn(SpriteBundle {
-            texture: texture_handles.char_face_laughing.clone(),
-            sprite: Sprite {
-                color: Color::WHITE,
-                custom_size: sprite_size,
+            });
+
+            cb.spawn(SpriteBundle {
+                texture: texture_handles.char_face_laughing.clone(),
+                sprite: Sprite {
+                    color: Color::WHITE,
+                    custom_size: sprite_size,
+                    ..default()
+                },
                 ..default()
-            },
-            ..default()
-        });
-    })
-    .id()
+            });
+        })
+        .id()
 }
