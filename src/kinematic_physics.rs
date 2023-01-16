@@ -36,25 +36,41 @@ impl Plugin for KinematicPhysics {
                     .label(SystemOrderLabel::Movement)
                     .with_system(kinematic_gravity)
                     .with_system(kinematic_apply_friction)
-                    .with_system(collision_test.after(kinematic_gravity))
+                    // Collisions
+                    .with_system(
+                        player_enemy_collision
+                            .label(SystemOrderLabel::Collisions)
+                            .after(kinematic_gravity),
+                    )
+                    .with_system(
+                        enemy_player_collision
+                            .label(SystemOrderLabel::Collisions)
+                            .after(kinematic_gravity),
+                    )
+                    .with_system(
+                        player_kill_enemy
+                            .label(SystemOrderLabel::Collisions)
+                            .after(kinematic_gravity),
+                    )
+                    // .with_system(collision_test.after(kinematic_gravity))
                     .with_system(move_enemies.after(kinematic_gravity))
                     .with_system(enemy_bounce_off_wall.after(kinematic_gravity))
                     .with_system(
                         kinematic_set_velocity
                             .after(kinematic_gravity)
-                            .after(kinematic_apply_friction)
-                            .after(collision_test),
+                            .after(SystemOrderLabel::Collisions)
+                            .after(kinematic_apply_friction), // .after(collision_test),
                     )
                     .with_system(
                         player_max_speed
                             .after(kinematic_set_velocity)
-                            .after(collision_test)
+                            .after(SystemOrderLabel::Collisions)
                             .before(kinematic_apply_velocity),
                     )
                     .with_system(
                         enemy_max_speed
                             .after(kinematic_set_velocity)
-                            .after(collision_test)
+                            .after(SystemOrderLabel::Collisions)
                             .before(kinematic_apply_velocity),
                     )
                     .with_system(kinematic_apply_velocity.after(kinematic_set_velocity))
@@ -64,33 +80,53 @@ impl Plugin for KinematicPhysics {
 }
 
 /* Read the character controller collisions stored in the character controller’s output. */
-fn collision_test(
+fn player_kill_enemy(
     mut commands: Commands,
-    mut q_player: Query<
-        (
-            Entity,
-            &KinematicCharacterControllerOutput,
-            &mut CCAcceleration,
-        ),
-        With<Player>,
-    >,
-    q_killboxes: Query<Entity, With<KillPlayerHitbox>>,
+    mut q_player: Query<(&KinematicCharacterControllerOutput, &mut CCAcceleration), With<Player>>,
     q_attackboxes: Query<(&Parent, Entity), With<KillEnemyHitbox>>,
 ) {
-    for (player, output, mut acc) in q_player.iter_mut() {
+    for (output, mut acc) in q_player.iter_mut() {
         for collision in &output.collisions {
-            // Do something with that collision information.
-
-            if let Ok(_killbox) = q_killboxes.get(collision.entity) {
-                // kill player
-                commands.entity(player).insert(ActorDead);
-            }
-
             if let Ok((parent, _hitbox)) = q_attackboxes.get(collision.entity) {
                 // kill enemy
                 commands.entity(parent.get()).insert(ActorDead);
                 // bounce
                 acc.0.y += 0.4;
+            }
+        }
+    }
+}
+
+fn player_enemy_collision(
+    mut commands: Commands,
+    mut q_player: Query<
+        (
+            Entity,
+            &KinematicCharacterControllerOutput,
+        ),
+        With<Player>,
+    >,
+    q_killboxes: Query<Entity, With<KillPlayerHitbox>>,
+) {
+    for (player, output) in q_player.iter_mut() {
+        for collision in &output.collisions {
+            if let Ok(_killbox) = q_killboxes.get(collision.entity) {
+                // kill player
+                commands.entity(player).insert(ActorDead);
+            }
+        }
+    }
+}
+
+fn enemy_player_collision(
+    mut commands: Commands,
+    q_player: Query<Entity, With<Player>>,
+    q_enemies: Query<&KinematicCharacterControllerOutput, With<KillPlayerHitbox>>,
+) {
+    for output in q_enemies.iter() {
+        for collision in &output.collisions {
+            if let Ok(player) = q_player.get(collision.entity) {
+                commands.entity(player).insert(ActorDead);
             }
         }
     }

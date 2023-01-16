@@ -34,7 +34,6 @@ pub const DEATHPLANE: f32 = -25.;
 
 // REFAC: kinematic physics ordering/labelling
 
-// BUG: if enemy collides with player, player does not die. if player collides with enemy, player does die.
 // BUG: cannot jump when pusing against wall. Character controller offset?
 // BUG: player sticks to walls
 
@@ -66,7 +65,7 @@ pub struct TextureHandles {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemLabel)]
 pub enum SystemOrderLabel {
     Input,
-    PreMovement,
+    Collisions,
     Movement,
 }
 
