@@ -7,6 +7,12 @@ use crate::{
     InGameItem, TextureHandles,
 };
 
+#[derive(Component)]
+pub struct KillEnemyHitbox;
+
+#[derive(Component)]
+pub struct KillPlayerHitbox;
+
 #[derive(Bundle)]
 struct EnemyBundle {
     pub rb: RigidBody,
@@ -16,6 +22,7 @@ struct EnemyBundle {
     pub acceleration: CCAcceleration,
     pub transform_bundle: TransformBundle,
 
+    _kph: KillPlayerHitbox,
     _vb: VisibilityBundle,
     _kg: KinematicGravity,
     _e: Enemy,
@@ -35,7 +42,8 @@ impl Default for EnemyBundle {
             velocity: CCVelocity(Vec2::new(0.0, 0.0)),
             acceleration: CCAcceleration(Vec2::new(0.0, 0.0)),
 
-            _vb:VisibilityBundle::default(),
+            _kph: KillPlayerHitbox,
+            _vb: VisibilityBundle::default(),
             _e: Enemy,
             _kg: KinematicGravity,
             _igi: InGameItem,
@@ -66,10 +74,21 @@ pub fn spawn_static_enemy(
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
     // Enemy
     commands
-        .spawn(EnemyBundle { 
-            transform_bundle: TransformBundle::from_transform(Transform::from_translation(position)),
-            ..default() })
+        .spawn(EnemyBundle {
+            transform_bundle: TransformBundle::from_transform(Transform::from_translation(
+                position,
+            )),
+            ..default()
+        })
+        .insert(ActiveCollisionTypes::default() | ActiveCollisionTypes::KINEMATIC_KINEMATIC)
+
         .with_children(|cb| {
+            // cb.spawn(Collider::ball(PLAYER_RADIUS))
+            //     .insert(TransformBundle::from_transform(Transform::from_xyz(
+            //         0.0, 0.3, 0.0,
+            //     )))
+            //     .insert(KillEnemyHitbox);
+
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_outline.clone(),
                 sprite: Sprite {
