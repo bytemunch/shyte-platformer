@@ -55,7 +55,7 @@ impl Default for EnemyBundle {
 struct StaticEnemy;
 
 #[derive(Component)]
-struct Enemy;
+pub struct Enemy;
 
 // pub struct StaticEnemyPlugin;
 
@@ -83,11 +83,11 @@ pub fn spawn_static_enemy(
         .insert(ActiveCollisionTypes::default() | ActiveCollisionTypes::KINEMATIC_KINEMATIC)
 
         .with_children(|cb| {
-            // cb.spawn(Collider::ball(PLAYER_RADIUS))
-            //     .insert(TransformBundle::from_transform(Transform::from_xyz(
-            //         0.0, 0.3, 0.0,
-            //     )))
-            //     .insert(KillEnemyHitbox);
+            cb.spawn(Collider::ball(PLAYER_RADIUS))
+                .insert(TransformBundle::from_transform(Transform::from_xyz(
+                    0.0, 0.3, 0.0,
+                )))
+                .insert(KillEnemyHitbox);
 
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_outline.clone(),

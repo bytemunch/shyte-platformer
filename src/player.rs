@@ -12,7 +12,7 @@ use crate::{
 };
 
 #[derive(Component)]
-struct Player {
+pub struct Player {
     jump_start: f32,
 }
 

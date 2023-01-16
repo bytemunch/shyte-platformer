@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::SystemOrderLabel;
+use crate::{
+    enemy::{KillEnemyHitbox, KillPlayerHitbox},
+    player::Player,
+    ActorDead, SystemOrderLabel,
+};
 
 pub const CC_GRAVITY: f32 = 0.1;
 pub const CC_WALK_SPEED: f32 = 0.3;
@@ -27,19 +31,55 @@ impl Plugin for KinematicPhysics {
                     .label(SystemOrderLabel::Movement)
                     .with_system(kinematic_gravity)
                     .with_system(kinematic_apply_friction)
+                    .with_system(collision_test.after(kinematic_gravity))
                     .with_system(
                         kinematic_set_velocity
                             .after(kinematic_gravity)
-                            .after(kinematic_apply_friction),
+                            .after(kinematic_apply_friction)
+                            .after(collision_test),
                     )
                     .with_system(
                         kinematic_max_speed
                             .after(kinematic_set_velocity)
+                            .after(collision_test)
                             .before(kinematic_apply_velocity),
                     )
                     .with_system(kinematic_apply_velocity.after(kinematic_set_velocity))
                     .after(SystemOrderLabel::Input),
             );
+    }
+}
+
+/* Read the character controller collisions stored in the character controller’s output. */
+fn collision_test(
+    mut commands: Commands,
+    mut q_player: Query<
+        (
+            Entity,
+            &mut KinematicCharacterControllerOutput,
+            &mut CCAcceleration,
+        ),
+        With<Player>,
+    >,
+    q_killboxes: Query<Entity, With<KillPlayerHitbox>>,
+    q_attackboxes: Query<(&Parent, Entity), With<KillEnemyHitbox>>,
+) {
+    for (player, output, mut acc) in q_player.iter_mut() {
+        for collision in &output.collisions {
+            // Do something with that collision information.
+
+            if let Ok(_killbox) = q_killboxes.get(collision.entity) {
+                // kill player
+                commands.entity(player).insert(ActorDead);
+            }
+
+            if let Ok((parent, _hitbox)) = q_attackboxes.get(collision.entity) {
+                // kill enemy
+                commands.entity(parent.get()).insert(ActorDead);
+                // bounce
+                acc.0.y += 0.4;
+            }
+        }
     }
 }
 

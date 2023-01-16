@@ -17,7 +17,6 @@ use bevy_rapier2d::prelude::*;
 
 use bevy_parallax::ParallaxCameraComponent;
 
-use enemy::KillPlayerHitbox;
 use interfaces::UserInterfacesPlugin;
 use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
@@ -32,7 +31,6 @@ pub const DEATHPLANE: f32 = -25.;
 
 // REFAC: bundled entity child bundles, for childbuilder.spawn(ChildBundle::default())
 //       like enemy/player child spritebundle bundle
-// TODO: enemy collision, attack
 // TODO: level loader
 // TODO: enemy "ha ha" particle effects
 // TODO: animate chalk
@@ -75,7 +73,6 @@ fn main() {
         .add_system_to_stage(CoreStage::PreUpdate, remove_dead_actors)
         // testing
         .add_system(fixup_images)
-        .add_system(collision_test)
         // my plugins
         .add_plugin(BackgroundPlugin)
         .add_plugin(StatesPlugin)
@@ -88,24 +85,6 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
         .add_plugin(RapierDebugRenderPlugin::default())
         .run();
-}
-
-/* Read the character controller collisions stored in the character controller’s output. */
-fn collision_test(
-    mut commands: Commands,
-    outputs: Query<(Entity, &mut KinematicCharacterControllerOutput)>,
-    q_killboxes: Query<Entity, With<KillPlayerHitbox>>,
-) {
-    for (player, output) in outputs.iter() {
-        for collision in &output.collisions {
-            // Do something with that collision information.
-
-            if let Ok(_killbox) = q_killboxes.get(collision.entity) {
-                // kill player
-                commands.entity(player).insert(ActorDead);
-            }
-        }
-    }
 }
 
 #[derive(Resource)]
