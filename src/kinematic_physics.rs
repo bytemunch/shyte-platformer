@@ -2,14 +2,19 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    enemy::{KillEnemyHitbox, KillPlayerHitbox},
+    enemy::{Enemy, EnemyMover, KillEnemyHitbox, KillPlayerHitbox},
     player::Player,
     ActorDead, SystemOrderLabel,
 };
 
+// physical constants
 pub const CC_GRAVITY: f32 = 0.1;
-pub const CC_WALK_SPEED: f32 = 0.3;
 pub const CC_FRICTION_COEFFICIENT: f32 = 1.2;
+
+pub const PLAYER_WALK_SPEED: f32 = 0.3;
+
+pub const ENEMY_WALK_ACCEL: f32 = 0.05;
+pub const ENEMY_WALK_SPEED: f32 = 0.05;
 
 #[derive(Component)]
 pub struct KinematicGravity;
@@ -32,6 +37,8 @@ impl Plugin for KinematicPhysics {
                     .with_system(kinematic_gravity)
                     .with_system(kinematic_apply_friction)
                     .with_system(collision_test.after(kinematic_gravity))
+                    .with_system(move_enemies.after(kinematic_gravity))
+                    .with_system(enemy_bounce_off_wall.after(kinematic_gravity))
                     .with_system(
                         kinematic_set_velocity
                             .after(kinematic_gravity)
@@ -39,7 +46,13 @@ impl Plugin for KinematicPhysics {
                             .after(collision_test),
                     )
                     .with_system(
-                        kinematic_max_speed
+                        player_max_speed
+                            .after(kinematic_set_velocity)
+                            .after(collision_test)
+                            .before(kinematic_apply_velocity),
+                    )
+                    .with_system(
+                        enemy_max_speed
                             .after(kinematic_set_velocity)
                             .after(collision_test)
                             .before(kinematic_apply_velocity),
@@ -56,7 +69,7 @@ fn collision_test(
     mut q_player: Query<
         (
             Entity,
-            &mut KinematicCharacterControllerOutput,
+            &KinematicCharacterControllerOutput,
             &mut CCAcceleration,
         ),
         With<Player>,
@@ -80,6 +93,28 @@ fn collision_test(
                 acc.0.y += 0.4;
             }
         }
+    }
+}
+
+fn enemy_bounce_off_wall(
+    mut q_enemies: Query<(&KinematicCharacterControllerOutput, &mut EnemyMover)>,
+) {
+    for (output, mut mover) in &mut q_enemies.iter_mut() {
+        for collision in &output.collisions {
+            mover.dir = if collision.toi.normal1.x == -1. {
+                -1.
+            } else if collision.toi.normal1.x == 1. {
+                1.
+            } else {
+                mover.dir
+            }
+        }
+    }
+}
+
+fn move_enemies(mut q: Query<(&mut CCAcceleration, &EnemyMover), With<Enemy>>) {
+    for (mut acc, mover) in q.iter_mut() {
+        acc.0.x += ENEMY_WALK_ACCEL * mover.dir;
     }
 }
 
@@ -129,14 +164,26 @@ fn kinematic_apply_velocity(mut query: Query<(&mut KinematicCharacterController,
     }
 }
 
-fn kinematic_max_speed(mut query: Query<&mut CCVelocity>) {
+fn player_max_speed(mut query: Query<&mut CCVelocity, With<Player>>) {
     for mut vel in &mut query {
-        if vel.0.x > CC_WALK_SPEED {
-            vel.0.x = CC_WALK_SPEED;
+        if vel.0.x > PLAYER_WALK_SPEED {
+            vel.0.x = PLAYER_WALK_SPEED;
         }
 
-        if vel.0.x < -CC_WALK_SPEED {
-            vel.0.x = -CC_WALK_SPEED;
+        if vel.0.x < -PLAYER_WALK_SPEED {
+            vel.0.x = -PLAYER_WALK_SPEED;
+        }
+    }
+}
+
+fn enemy_max_speed(mut query: Query<&mut CCVelocity, With<Enemy>>) {
+    for mut vel in &mut query {
+        if vel.0.x > ENEMY_WALK_SPEED {
+            vel.0.x = ENEMY_WALK_SPEED;
+        }
+
+        if vel.0.x < -ENEMY_WALK_SPEED {
+            vel.0.x = -ENEMY_WALK_SPEED;
         }
     }
 }

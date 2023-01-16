@@ -31,11 +31,19 @@ pub const DEATHPLANE: f32 = -25.;
 
 // REFAC: bundled entity child bundles, for childbuilder.spawn(ChildBundle::default())
 //       like enemy/player child spritebundle bundle
+
+// REFAC: kinematic physics ordering/labelling
+
+// BUG: if enemy collides with player, player does not die. if player collides with enemy, player does die.
+// BUG: cannot jump when pusing against wall. Character controller offset?
+// BUG: player sticks to walls
+
+// TODO: enemy edge detection: filtered colliders over edges of boxes
 // TODO: level loader
 // TODO: enemy "ha ha" particle effects
 // TODO: animate chalk
-// TODO: moving enemies, a la goomba
 // TODO: coyote time
+// TODO: fill in box graphics
 
 #[derive(Component)]
 pub struct Actor;

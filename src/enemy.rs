@@ -13,6 +13,11 @@ pub struct KillEnemyHitbox;
 #[derive(Component)]
 pub struct KillPlayerHitbox;
 
+#[derive(Component)]
+pub struct EnemyMover {
+    pub dir: f32
+}
+
 #[derive(Bundle)]
 struct EnemyBundle {
     pub rb: RigidBody,
@@ -57,16 +62,7 @@ struct StaticEnemy;
 #[derive(Component)]
 pub struct Enemy;
 
-// pub struct StaticEnemyPlugin;
-
-// impl Plugin for StaticEnemyPlugin {
-//     fn build(&self, app: &mut App) {
-//         app
-//         .add_system();
-//     }
-// }
-
-pub fn spawn_static_enemy(
+pub fn spawn_enemy(
     commands: &mut Commands,
     texture_handles: &TextureHandles,
     position: Vec3,
@@ -83,7 +79,7 @@ pub fn spawn_static_enemy(
         .insert(ActiveCollisionTypes::default() | ActiveCollisionTypes::KINEMATIC_KINEMATIC)
 
         .with_children(|cb| {
-            cb.spawn(Collider::ball(PLAYER_RADIUS))
+            cb.spawn(Collider::ball(PLAYER_RADIUS-0.1))
                 .insert(TransformBundle::from_transform(Transform::from_xyz(
                     0.0, 0.3, 0.0,
                 )))

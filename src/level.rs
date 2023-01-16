@@ -5,7 +5,7 @@ use bevy_rapier2d::prelude::*;
 use iyes_loopless::prelude::{AppLooplessStateExt, ConditionHelpers, IntoConditionalSystem};
 
 use crate::{
-    enemy::spawn_static_enemy,
+    enemy::{spawn_enemy, EnemyMover},
     states::{GameState, PauseState},
     util::despawn_with,
     Actor, ActorDead, InGameItem, TextureHandles, DEATHPLANE,
@@ -27,6 +27,9 @@ impl Plugin for LevelPlugin {
 }
 
 #[derive(Component)]
+pub struct TagBox;
+
+#[derive(Component)]
 struct BoxTopLeft(Vec2);
 
 #[derive(Component)]
@@ -39,6 +42,7 @@ struct BoxBundle {
     collider: Collider,
     transform_bundle: TransformBundle,
 
+    _tag: TagBox,
     _igi: InGameItem,
     _vb: VisibilityBundle,
 }
@@ -51,6 +55,7 @@ impl Default for BoxBundle {
             collider: Collider::cuboid(5.0, 5.0),
             transform_bundle: TransformBundle::from_transform(Transform::from_xyz(0.0, 0.0, 0.0)),
 
+            _tag: TagBox,
             _igi: InGameItem,
             _vb: VisibilityBundle::default(),
         }
@@ -176,6 +181,15 @@ fn setup_level(
 
     create_box(
         &mut commands,
+        Vec2::new(15., FLOOR_0 + 2.),
+        Vec2::new(20., FLOOR_0_BOTTOM + 2.),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    create_box(
+        &mut commands,
         Vec2::new(20., FLOOR_0),
         Vec2::new(30., FLOOR_0_BOTTOM),
         &texture_handles,
@@ -193,8 +207,10 @@ fn setup_level(
         )))
         .insert(InGameItem);
     // enemy
-    spawn_static_enemy(&mut commands, &texture_handles, Vec3::new(10.0, 0.0, 10.0));
-    spawn_static_enemy(&mut commands, &texture_handles, Vec3::new(5.0, 0.0, 10.0));
+    let e1 = spawn_enemy(&mut commands, &texture_handles, Vec3::new(10.0, 0.0, 10.0));
+    commands.entity(e1).insert(EnemyMover {dir: 1.});
+
+    spawn_enemy(&mut commands, &texture_handles, Vec3::new(5.0, 0.0, 10.0));
 }
 
 fn despawn_level(commands: Commands, query: Query<Entity, With<InGameItem>>) {
