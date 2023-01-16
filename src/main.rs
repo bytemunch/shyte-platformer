@@ -23,19 +23,26 @@ use level::LevelPlugin;
 use pause::PausePlugin;
 use player::PlayerPlugin;
 use states::StatesPlugin;
+use util::despawn_with;
 
 pub const CAMERA_SCALE: f32 = 1. / 24.;
 
-// TODO: bundled entity child bundles, for childbuilder.spawn(ChildBundle::default())
+pub const DEATHPLANE: f32 = -25.;
+
+// REFAC: bundled entity child bundles, for childbuilder.spawn(ChildBundle::default())
 //       like enemy/player child spritebundle bundle
 // TODO: enemy collision, attack and die
 // TODO: level loader
 // TODO: enemy "ha ha" particle effects
 // TODO: animate chalk
 // TODO: moving enemies, a la goomba
-// TODO: enemies die when past deathplane
-// TODO: deathplane as pub const
 // TODO: coyote time
+
+#[derive(Component)]
+pub struct Actor;
+
+#[derive(Component)]
+pub struct ActorDead;
 
 #[derive(Component)]
 pub struct InGameItem;
@@ -64,6 +71,7 @@ fn main() {
         // setup
         .add_startup_system(load_textures)
         .add_startup_system(setup_graphics)
+        .add_system_to_stage(CoreStage::PreUpdate, remove_dead_actors)
         // testing
         .add_system(fixup_images)
         // my plugins
@@ -139,10 +147,10 @@ fn fixup_images(
                     // it is some other image
                 }
             }
-            AssetEvent::Modified { handle:_ } => {
+            AssetEvent::Modified { handle: _ } => {
                 // an image was modified
             }
-            AssetEvent::Removed { handle:_ } => {
+            AssetEvent::Removed { handle: _ } => {
                 // an image was unloaded
             }
         }
@@ -166,4 +174,8 @@ fn setup_graphics(mut commands: Commands) {
         })
         // parallax
         .insert(ParallaxCameraComponent);
+}
+
+fn remove_dead_actors(commands: Commands, q: Query<Entity, With<ActorDead>>) {
+    despawn_with(commands, q);
 }

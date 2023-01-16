@@ -2,10 +2,13 @@ use std::f32::consts::PI;
 
 use bevy::{prelude::*, render::mesh::VertexAttributeValues, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
-use iyes_loopless::prelude::AppLooplessStateExt;
+use iyes_loopless::prelude::{AppLooplessStateExt, ConditionHelpers, IntoConditionalSystem};
 
 use crate::{
-    enemy::spawn_static_enemy, states::GameState, util::despawn_with, InGameItem, TextureHandles,
+    enemy::spawn_static_enemy,
+    states::{GameState, PauseState},
+    util::despawn_with,
+    Actor, ActorDead, InGameItem, TextureHandles, DEATHPLANE,
 };
 pub struct LevelPlugin;
 
@@ -14,7 +17,12 @@ impl Plugin for LevelPlugin {
         app
             // ingame transitions
             .add_enter_system(GameState::InGame, setup_level)
-            .add_exit_system(GameState::InGame, despawn_level);
+            .add_exit_system(GameState::InGame, despawn_level)
+            .add_system(
+                actor_fall_out
+                    .run_in_state(GameState::InGame)
+                    .run_in_state(PauseState::Running),
+            );
     }
 }
 
@@ -191,4 +199,12 @@ fn setup_level(
 
 fn despawn_level(commands: Commands, query: Query<Entity, With<InGameItem>>) {
     despawn_with(commands, query)
+}
+
+fn actor_fall_out(mut commands: Commands, query: Query<(&Transform, Entity), With<Actor>>) {
+    for (transfrorm, entity) in &query {
+        if transfrorm.translation.y < DEATHPLANE {
+            commands.entity(entity).insert(ActorDead);
+        }
+    }
 }

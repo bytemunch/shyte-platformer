@@ -8,7 +8,7 @@ use iyes_loopless::{
 use crate::{
     kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity},
     states::{GameState, PauseState},
-    InGameItem, TextureHandles, SystemOrderLabel,
+    Actor, InGameItem, SystemOrderLabel, TextureHandles,
 };
 
 #[derive(Component)]
@@ -28,14 +28,21 @@ impl Plugin for PlayerPlugin {
         .add_system(
             player_movement
                 .run_in_state(GameState::InGame)
-                .run_in_state(PauseState::Running).label(SystemOrderLabel::Input),
+                .run_in_state(PauseState::Running)
+                .label(SystemOrderLabel::Input),
         )
         .add_system(
-            player_fall_out
+            detect_player_removed
                 .run_in_state(GameState::InGame)
                 .run_in_state(PauseState::Running),
         )
         .add_enter_system(GameState::InGame, spawn_player);
+    }
+}
+
+fn detect_player_removed(mut commands: Commands, removals: RemovedComponents<Player>) {
+    for _entity in removals.iter() {
+        commands.insert_resource(NextState(GameState::Dead));
     }
 }
 
@@ -62,6 +69,7 @@ fn spawn_player(mut commands: Commands, texture_handles: Res<TextureHandles>) {
         .insert(KinematicGravity)
         .insert(Player { jump_start: 0. })
         .insert(InGameItem)
+        .insert(Actor)
         .insert(SpriteBundle {
             texture: texture_handles.char_outline.clone(),
             sprite: Sprite {
@@ -143,13 +151,5 @@ fn camera_follow_player(
             // player_transform.translation().y + 25.,
             0.,
         )
-    }
-}
-
-fn player_fall_out(mut commands: Commands, query: Query<&Transform, With<Player>>) {
-    for transfrorm in &query {
-        if transfrorm.translation.y < -80. {
-            commands.insert_resource(NextState(GameState::Dead));
-        }
     }
 }
