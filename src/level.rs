@@ -115,6 +115,30 @@ pub fn create_box(
             ..default()
         })
         .with_children(|cb| {
+            // Edge colliders
+            const EC_WIDTH: f32 = 0.1;
+            const EC_HEIGHT: f32 = 1.0;
+            cb.spawn((
+                Collider::cuboid(EC_WIDTH / 2., EC_HEIGHT / 2.),
+                CollisionGroups::new(Group::GROUP_1, Group::GROUP_1),
+            ))
+            .insert(TransformBundle::from_transform(Transform::from_xyz(
+                -(w + EC_WIDTH) / 2.,
+                (h + EC_HEIGHT) / 2.,
+                10.0,
+            )));
+
+            cb.spawn((
+                Collider::cuboid(EC_WIDTH / 2., EC_HEIGHT / 2.),
+                CollisionGroups::new(Group::GROUP_1, Group::GROUP_1),
+            ))
+            .insert(TransformBundle::from_transform(Transform::from_xyz(
+                (w + EC_WIDTH) / 2.,
+                (h + EC_HEIGHT) / 2.,
+                10.0,
+            )));
+
+            // Graphics
             // TOP
             cb.spawn(MaterialMesh2dBundle {
                 mesh: meshes.add(x_mesh.clone().into()).into(),
@@ -181,15 +205,6 @@ fn setup_level(
 
     create_box(
         &mut commands,
-        Vec2::new(15., FLOOR_0 + 2.),
-        Vec2::new(20., FLOOR_0_BOTTOM + 2.),
-        &texture_handles,
-        &mut meshes,
-        &mut materials,
-    );
-
-    create_box(
-        &mut commands,
         Vec2::new(20., FLOOR_0),
         Vec2::new(30., FLOOR_0_BOTTOM),
         &texture_handles,
@@ -208,7 +223,7 @@ fn setup_level(
         .insert(InGameItem);
     // enemy
     let e1 = spawn_enemy(&mut commands, &texture_handles, Vec3::new(10.0, 0.0, 10.0));
-    commands.entity(e1).insert(EnemyMover {dir: 1.});
+    commands.entity(e1).insert(EnemyMover { dir: 1. });
 
     spawn_enemy(&mut commands, &texture_handles, Vec3::new(5.0, 0.0, 10.0));
 }

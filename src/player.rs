@@ -57,11 +57,15 @@ fn spawn_player(mut commands: Commands, texture_handles: Res<TextureHandles>) {
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
     // Player
     commands
-        .spawn(RigidBody::KinematicPositionBased)
+        .spawn((
+            RigidBody::KinematicPositionBased,
+            ActiveHooks::FILTER_CONTACT_PAIRS,
+        ))
         .insert(Collider::ball(PLAYER_RADIUS))
         .insert(KinematicCharacterController {
             apply_impulse_to_dynamic_bodies: true,
             translation: Some(Vec2::ZERO),
+            filter_groups: Some(CollisionGroups::new(Group::GROUP_2, Group::GROUP_2)),
             ..default()
         })
         .insert(CCAcceleration(Vec2::new(0., 0.)))

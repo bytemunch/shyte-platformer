@@ -36,8 +36,8 @@ pub const DEATHPLANE: f32 = -25.;
 
 // BUG: cannot jump when pusing against wall. Character controller offset?
 // BUG: player sticks to walls
+// BUG: jittery enemy movement SOMETIMES, ordering issue. (likely all movement is jittery, camera moving masks it)
 
-// TODO: enemy edge detection: filtered colliders over edges of boxes
 // TODO: level loader
 // TODO: enemy "ha ha" particle effects
 // TODO: animate chalk
