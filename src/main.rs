@@ -41,8 +41,10 @@ pub const DEATHPLANE: f32 = -25.;
 // TODO: level loader
 // TODO: enemy "ha ha" particle effects
 // TODO: animate chalk
-// TODO: coyote time
 // TODO: fill in box graphics
+
+// TODO: respect meter, fills as percentage of enemies killed
+// TODO: full respect meter win state
 
 #[derive(Component)]
 pub struct Actor;

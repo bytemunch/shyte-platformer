@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use iyes_loopless::{
@@ -14,6 +16,7 @@ use crate::{
 #[derive(Component)]
 pub struct Player {
     jump_start: f32,
+    can_jump: Timer,
 }
 
 pub struct PlayerPlugin;
@@ -51,6 +54,8 @@ const PLAYER_JUMP_MAX_DURATION: f32 = 1.;
 const PLAYER_JUMP_FALLOFF_EXPONENT: f32 = 12.;
 const PLAYER_WALK_ACCEL: f32 = 0.05;
 
+const PLAYER_COYOTE_TIME: f32 = 0.05;
+
 pub const PLAYER_RADIUS: f32 = 0.8;
 
 fn spawn_player(mut commands: Commands, texture_handles: Res<TextureHandles>) {
@@ -71,7 +76,10 @@ fn spawn_player(mut commands: Commands, texture_handles: Res<TextureHandles>) {
         .insert(CCAcceleration(Vec2::new(0., 0.)))
         .insert(CCVelocity(Vec2::new(0., 0.)))
         .insert(KinematicGravity)
-        .insert(Player { jump_start: 0. })
+        .insert(Player {
+            jump_start: 0.,
+            can_jump: Timer::new(Duration::from_secs_f32(PLAYER_COYOTE_TIME), TimerMode::Once),
+        })
         .insert(InGameItem)
         .insert(Actor)
         .insert(SpriteBundle {
@@ -115,19 +123,26 @@ fn player_movement(
     mut player_info: Query<(
         &KinematicCharacterControllerOutput,
         &mut CCAcceleration,
+        &mut CCVelocity,
         &mut Player,
     )>,
 ) {
-    for (output, mut acc, mut player) in &mut player_info {
+    for (output, mut acc, mut vel, mut player) in &mut player_info {
         let up_start = keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
         let up_held = keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
         // let down = keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]);
         let left = keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]);
         let right = keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]);
 
+        if output.grounded {
+            player.can_jump.reset();
+        } else {
+            player.can_jump.tick(time.delta());
+        }
+
         let x_axis = (-(left as i8) + right as i8) as f32 * PLAYER_WALK_ACCEL;
 
-        let y_axis = if up_start && output.grounded {
+        let y_axis = if up_start && !player.can_jump.finished() {
             // JUMP
             player.jump_start = time.elapsed_seconds();
             PLAYER_JUMP_ACCEL
@@ -139,7 +154,22 @@ fn player_movement(
             0.
         };
 
-        acc.0 += Vec2::new(x_axis, y_axis);
+        acc.0.x += x_axis;
+        acc.0.y = if y_axis != 0. {
+            // JUMP
+            // extra jump check superfluous but allows expansion elsewhere
+            vel.0.y = if vel.0.y < 0. && !player.can_jump.finished() {
+                0.
+            } else {
+                vel.0.y
+            };
+            player
+                .can_jump
+                .set_elapsed(Duration::from_secs_f32(PLAYER_COYOTE_TIME));
+            y_axis
+        } else {
+            0.
+        }
     }
 }
 
