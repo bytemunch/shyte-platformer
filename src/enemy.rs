@@ -1,4 +1,8 @@
 use bevy::prelude::*;
+use bevy_particle_systems::{
+    ColorPoint, JitteredValue, ParticleSpace, ParticleSystem, ParticleSystemBundle,
+    ParticleTexture, Playing,
+};
 use bevy_rapier2d::prelude::*;
 
 use crate::{
@@ -15,7 +19,7 @@ pub struct KillPlayerHitbox;
 
 #[derive(Component)]
 pub struct EnemyMover {
-    pub dir: f32
+    pub dir: f32,
 }
 
 #[derive(Bundle)]
@@ -68,6 +72,10 @@ pub fn spawn_enemy(
     position: Vec3,
 ) -> Entity {
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
+
+    let mut fade_out = Vec::new();
+    fade_out.push(ColorPoint::new(Color::WHITE, 0.));
+    fade_out.push(ColorPoint::new(Color::NONE, 1.));
     // Enemy
     commands
         .spawn(EnemyBundle {
@@ -77,9 +85,32 @@ pub fn spawn_enemy(
             ..default()
         })
         .insert(ActiveCollisionTypes::default() | ActiveCollisionTypes::KINEMATIC_KINEMATIC)
-
         .with_children(|cb| {
-            cb.spawn(Collider::ball(PLAYER_RADIUS-0.1))
+            cb.spawn(ParticleSystemBundle {
+                particle_system: ParticleSystem {
+                    texture: ParticleTexture::Sprite(texture_handles.ha.clone()),
+                    spawn_rate_per_second: 4.0.into(),
+                    spawn_radius: 1.0.into(),
+                    initial_speed: JitteredValue::jittered(1.5, -0.5..0.5),
+                    lifetime: JitteredValue::jittered(2., -1.0..1.0),
+                    emitter_shape: std::f32::consts::PI,
+                    emitter_angle: std::f32::consts::PI / 2.0,
+                    looping: true,
+                    scale: 0.007.into(),
+                    system_duration_seconds: 50.0,
+                    initial_rotation: JitteredValue::jittered(0., -0.4..0.4),
+                    // z_value_override: Some(JitteredValue::new(10.0)),
+                    color: fade_out.into(),
+                    space: ParticleSpace::Local,
+                    despawn_particles_with_system: true,
+
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Playing);
+
+            cb.spawn(Collider::ball(PLAYER_RADIUS - 0.1))
                 .insert(TransformBundle::from_transform(Transform::from_xyz(
                     0.0, 0.3, 0.0,
                 )))

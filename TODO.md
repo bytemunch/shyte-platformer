@@ -17,7 +17,6 @@ BUG: jittery enemy movement SOMETIMES, ordering issue. (likely all movement is j
 TODO: Coyote time: ignore gravity while active
 
 TODO: level loader
-TODO: enemy "ha ha" particle effects
 TODO: animate chalk
 TODO: fill in box graphics
 

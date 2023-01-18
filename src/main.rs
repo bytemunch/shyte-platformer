@@ -13,6 +13,7 @@ use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::render::render_resource::{AddressMode, SamplerDescriptor};
 use bevy::render::texture::ImageSampler;
+use bevy_particle_systems::ParticleSystemPlugin;
 use bevy_rapier2d::prelude::*;
 
 use bevy_parallax::ParallaxCameraComponent;
@@ -44,6 +45,7 @@ pub struct TextureHandles {
     char_outline: Handle<Image>,
     char_face_angry: Handle<Image>,
     char_face_laughing: Handle<Image>,
+    ha: Handle<Image>,
     chalk_line_horizontal: Handle<Image>,
 }
 
@@ -73,6 +75,8 @@ fn main() {
         .add_plugin(PausePlugin)
         .add_plugin(LevelPlugin)
         .add_plugin(KinematicPhysics)
+        // particles
+        .add_plugin(ParticleSystemPlugin)
         // physics
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
         .add_plugin(RapierDebugRenderPlugin::default())
@@ -132,6 +136,7 @@ fn fixup_images(
                         char_outline: asset_server.load("img/character/outline.png"),
                         char_face_angry: asset_server.load("img/character/face_angry.png"),
                         char_face_laughing: asset_server.load("img/character/face_laughing.png"),
+                        ha: asset_server.load("img/ha.png"),
                         chalk_line_horizontal: clh,
                     });
                 } else {
