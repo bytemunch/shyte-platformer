@@ -25,6 +25,9 @@ struct MenuButton;
 struct PlayButton;
 
 #[derive(Component)]
+struct EditorButton;
+
+#[derive(Component)]
 struct QuitButton;
 
 #[derive(Component)]
@@ -51,6 +54,7 @@ impl Plugin for UserInterfacesPlugin {
             .add_system(quit_button)
             .add_system(replay_button)
             .add_system(menu_button)
+            .add_system(editor_button)
             .add_system(pause_resume_button.run_in_state(PauseState::Paused))
             .add_system(play_button.run_in_state(GameState::MainMenu));
     }
@@ -150,6 +154,34 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(MenuItem)
         .insert(PlayButton);
 
+    commands
+        .spawn(ButtonBundle {
+            style: Style {
+                size: Size::new(Val::Px(150.0), Val::Px(65.0)),
+                // center button
+                margin: UiRect::all(Val::Auto),
+                // horizontally center child text
+                justify_content: JustifyContent::Center,
+                // vertically center child text
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            background_color: Color::rgb(128., 0., 0.).into(),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                "EDITOR",
+                TextStyle {
+                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    font_size: 40.0,
+                    color: Color::rgb(0.9, 0.9, 0.9),
+                },
+            ));
+        })
+        .insert(MenuItem)
+        .insert(EditorButton);
+
     // quit button
     commands
         .spawn(ButtonBundle {
@@ -185,6 +217,19 @@ fn play_button(mut commands: Commands, button_query: Query<&Interaction, With<Pl
         match *interact {
             Interaction::Clicked => {
                 commands.insert_resource(NextState(GameState::InGame));
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+
+fn editor_button(mut commands: Commands, button_query: Query<&Interaction, With<EditorButton>>) {
+    for interact in &button_query {
+        match *interact {
+            Interaction::Clicked => {
+                commands.insert_resource(NextState(GameState::LevelEditor));
             }
             Interaction::Hovered => {}
             Interaction::None => {}

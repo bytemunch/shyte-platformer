@@ -7,6 +7,7 @@ mod pause;
 mod player;
 mod states;
 mod util;
+mod level_editor;
 
 use background::BackgroundPlugin;
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
@@ -21,6 +22,7 @@ use bevy_parallax::ParallaxCameraComponent;
 use interfaces::UserInterfacesPlugin;
 use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
+use level_editor::LevelEditorPlugin;
 use pause::PausePlugin;
 use player::PlayerPlugin;
 use states::StatesPlugin;
@@ -47,6 +49,7 @@ pub struct TextureHandles {
     char_face_laughing: Handle<Image>,
     ha: Handle<Image>,
     chalk_line_horizontal: Handle<Image>,
+    crosshair: Handle<Image>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemLabel)]
@@ -75,6 +78,7 @@ fn main() {
         .add_plugin(PausePlugin)
         .add_plugin(LevelPlugin)
         .add_plugin(KinematicPhysics)
+        .add_plugin(LevelEditorPlugin)
         // particles
         .add_plugin(ParticleSystemPlugin)
         // physics
@@ -138,6 +142,7 @@ fn fixup_images(
                         char_face_laughing: asset_server.load("img/character/face_laughing.png"),
                         ha: asset_server.load("img/ha.png"),
                         chalk_line_horizontal: clh,
+                        crosshair: asset_server.load("img/crosshair.png"),
                     });
                 } else {
                     // it is some other image

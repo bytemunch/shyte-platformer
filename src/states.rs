@@ -5,6 +5,7 @@ use iyes_loopless::prelude::AppLooplessStateExt;
 pub enum GameState {
     MainMenu,
     InGame,
+    LevelEditor,
     Dead,
 }
 

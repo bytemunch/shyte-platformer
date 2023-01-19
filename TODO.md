@@ -3,8 +3,9 @@
 ## REFACS
 
 REFAC: bundled entity child bundles, for childbuilder.spawn(ChildBundle::default())
-      like enemy/player child spritebundle bundle
+    like enemy/player child spritebundle bundle
 REFAC: kinematic physics ordering/labelling
+REFAC: button clicking functions can be one function with some component matching?
 
 ## BUGS
 
@@ -16,8 +17,14 @@ BUG: jittery enemy movement SOMETIMES, ordering issue. (likely all movement is j
 
 TODO: Coyote time: ignore gravity while active
 
-TODO: level loader
+TODO: Box regenerate meshes
+
 TODO: level editor
+    TODO: Editor tools
+    TODO: editor show selected
+    TODO: Editor save / load
+
+TODO: level loader
 TODO: animate chalk
 TODO: fill in box graphics
 
