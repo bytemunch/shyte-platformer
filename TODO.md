@@ -24,26 +24,28 @@ BUG: enemy still moves when paused
 
 TODO: Coyote time: ignore gravity while active
 
-TODO: 9-Patch box drawing
-
-    TODO: Box regenerate meshes
-
-    TODO: fill in box graphics
-
-TODO: level editor
-
-    TODO: Editor tools
-
-    TODO: editor show selected
-
-    TODO: Editor save / load
-
-TODO: level loader
+TODO: fill in box graphics
 
 TODO: animate chalk
-
-
 
 TODO: respect meter, fills as percentage of enemies killed
 
 TODO: full respect meter win state
+
+## SCOPE CREEP
+
+CREEP: level editor
+
+    CREEP: Editor tools
+
+    CREEP: editor show selected
+
+    CREEP: Editor save / load
+
+    CREEP: Editor menu, opened with escape, save, load, quit, menu
+
+    CREEP: Box regenerate meshes
+
+CREEP: level loader
+
+CREEP: 9-Patch box drawing
