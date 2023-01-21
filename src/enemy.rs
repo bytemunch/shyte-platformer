@@ -22,6 +22,12 @@ pub struct EnemyMover {
     pub dir: f32,
 }
 
+impl Default for EnemyMover {
+    fn default() -> Self {
+        Self { dir: 1. }
+    }
+}
+
 #[derive(Bundle)]
 struct EnemyBundle {
     pub rb: RigidBody,
@@ -70,6 +76,7 @@ pub fn spawn_enemy(
     commands: &mut Commands,
     texture_handles: &TextureHandles,
     position: Vec3,
+    mover: bool,
 ) -> Entity {
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
 
@@ -77,7 +84,7 @@ pub fn spawn_enemy(
     fade_out.push(ColorPoint::new(Color::WHITE, 0.));
     fade_out.push(ColorPoint::new(Color::NONE, 1.));
     // Enemy
-    commands
+    let e = commands
         .spawn(EnemyBundle {
             transform_bundle: TransformBundle::from_transform(Transform::from_translation(
                 position,
@@ -146,5 +153,11 @@ pub fn spawn_enemy(
                 ..default()
             });
         })
-        .id()
+        .id();
+
+    if mover {
+        commands.entity(e).insert(EnemyMover::default());
+    }
+
+    e
 }

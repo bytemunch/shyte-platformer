@@ -1,24 +1,17 @@
 # TODO
 
-## REFACS
-
-REFAC: bundled entity child bundles, for childbuilder.spawn(ChildBundle::default())
-    like enemy/player child spritebundle bundle
-
-REFAC: kinematic physics ordering/labelling
-
-REFAC: button clicking functions can be one function with some component matching?
-
 ## BUGS
 
 BUG: cannot jump when pusing against wall. Character controller offset?
 
-BUG: player sticks to walls
+BUG: player sticks to walls AND ceilings
 
 BUG: jittery enemy movement SOMETIMES, ordering issue. (likely all movement is 
 jittery, camera moving masks it)
 
 BUG: enemy still moves when paused
+
+BUG: enemies don't bounce off eachother
 
 ## TODOS
 
@@ -31,6 +24,9 @@ TODO: animate chalk
 TODO: respect meter, fills as percentage of enemies killed
 
 TODO: full respect meter win state
+
+TODO: color moving/static enemies
+
 
 ## SCOPE CREEP
 
@@ -49,3 +45,18 @@ CREEP: level editor
 CREEP: level loader
 
 CREEP: 9-Patch box drawing
+
+## REFACS
+
+### A.K.A "NEVERTODOS"
+
+`it don't have to be perfect just ship SOMETHING for ONCE jeeeeeeeeeeez`
+
+REFAC: bundled entity child bundles, for childbuilder.spawn(ChildBundle::default())
+    like enemy/player child spritebundle bundle
+
+REFAC: kinematic physics ordering/labelling
+
+REFAC: button clicking functions can be one function with some component matching?
+
+REFAC: level vec for platforms and enemies, iterate and spawn instead of writing out helper fns lmao

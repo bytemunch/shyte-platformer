@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use iyes_loopless::{
-    prelude::{AppLooplessStateExt, ConditionHelpers, IntoConditionalSystem},
+    prelude::{ConditionHelpers, IntoConditionalSystem},
     state::NextState,
 };
 
@@ -38,8 +38,7 @@ impl Plugin for PlayerPlugin {
             detect_player_removed
                 .run_in_state(GameState::InGame)
                 .run_in_state(PauseState::Running),
-        )
-        .add_enter_system(GameState::InGame, spawn_player);
+        );
     }
 }
 
@@ -58,7 +57,7 @@ const PLAYER_COYOTE_TIME: f32 = 0.05;
 
 pub const PLAYER_RADIUS: f32 = 0.8;
 
-fn spawn_player(mut commands: Commands, texture_handles: Res<TextureHandles>) {
+pub fn spawn_player(commands: &mut Commands, texture_handles: &TextureHandles, position: Vec3) {
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
     // Player
     commands
@@ -89,7 +88,7 @@ fn spawn_player(mut commands: Commands, texture_handles: Res<TextureHandles>) {
                 custom_size: sprite_size,
                 ..default()
             },
-            transform: Transform::from_xyz(0.0, 0.0, 10.),
+            transform: Transform::from_translation(position),
             ..default()
         })
         .with_children(|f| {

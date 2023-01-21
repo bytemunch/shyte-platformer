@@ -5,7 +5,8 @@ use bevy_rapier2d::prelude::*;
 use iyes_loopless::prelude::{AppLooplessStateExt, ConditionHelpers, IntoConditionalSystem};
 
 use crate::{
-    enemy::{spawn_enemy, EnemyMover},
+    enemy::spawn_enemy,
+    player::spawn_player,
     states::{GameState, PauseState},
     util::despawn_with,
     Actor, ActorDead, InGameItem, TextureHandles, DEATHPLANE,
@@ -192,8 +193,27 @@ fn setup_level(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    const FLOOR_0: f32 = -5.;
-    const FLOOR_0_BOTTOM: f32 = -10.;
+    const FLOOR_0: f32 = -10.;
+    const FLOOR_1: f32 = 0.;
+    const FLOOR_0_BOTTOM: f32 = -15.;
+    const FLOOR_1_BOTTOM: f32 = -5.;
+
+    // const MAX_JUMP: f32 = 12.;
+
+    spawn_player(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(80., FLOOR_1 + 1., 10.),
+    );
+
+    // first static enemy
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(10.0, FLOOR_0 + 1.0, 10.0),
+        false,
+    );
+
     create_box(
         &mut commands,
         Vec2::new(0., FLOOR_0),
@@ -201,6 +221,14 @@ fn setup_level(
         &texture_handles,
         &mut meshes,
         &mut materials,
+    );
+
+    // first moving enemy
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(25.0, FLOOR_0 + 1.0, 10.0),
+        true,
     );
 
     create_box(
@@ -212,20 +240,215 @@ fn setup_level(
         &mut materials,
     );
 
-    /* Create the bouncing ball. */
-    commands
-        .spawn(RigidBody::Dynamic)
-        .insert(Collider::ball(50.0))
-        .insert(Restitution::coefficient(0.7))
-        .insert(TransformBundle::from(Transform::from_xyz(
-            100.0, 400.0, 0.0,
-        )))
-        .insert(InGameItem);
-    // enemy
-    let e1 = spawn_enemy(&mut commands, &texture_handles, Vec3::new(10.0, 0.0, 10.0));
-    commands.entity(e1).insert(EnemyMover { dir: 1. });
+    // higher level
 
-    spawn_enemy(&mut commands, &texture_handles, Vec3::new(5.0, 0.0, 10.0));
+    create_box(
+        &mut commands,
+        Vec2::new(30., FLOOR_1),
+        Vec2::new(50., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    // big jump down from higher up
+
+    create_box(
+        &mut commands,
+        Vec2::new(62., FLOOR_0),
+        Vec2::new(75., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    // jump to higher level with gap
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(82.5, FLOOR_1 + 1., 10.),
+        false,
+    );
+    create_box(
+        &mut commands,
+        Vec2::new(80., FLOOR_1),
+        Vec2::new(85., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    // jump down past gap onto small platform with moving enemy
+
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(96., FLOOR_0 + 1., 10.),
+        true,
+    );
+    create_box(
+        &mut commands,
+        Vec2::new(95., FLOOR_0),
+        Vec2::new(98., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    // little gap little platform
+
+    create_box(
+        &mut commands,
+        Vec2::new(102., FLOOR_0),
+        Vec2::new(105., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    // overhang
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(115., FLOOR_0 + 1., 10.),
+        true,
+    );
+
+    create_box(
+        &mut commands,
+        Vec2::new(110., FLOOR_0),
+        Vec2::new(120., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    create_box(
+        &mut commands,
+        Vec2::new(115., FLOOR_1),
+        Vec2::new(120., FLOOR_1_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    create_box(
+        &mut commands,
+        Vec2::new(120., FLOOR_1),
+        Vec2::new(130., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    // longish platform
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(141., FLOOR_0 + 1., 10.),
+        true,
+    );
+
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(144., FLOOR_0 + 1., 10.),
+        true,
+    );
+
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(147., FLOOR_0 + 1., 10.),
+        true,
+    );
+
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(159., FLOOR_0 + 1., 10.),
+        false,
+    );
+
+    create_box(
+        &mut commands,
+        Vec2::new(140., FLOOR_0),
+        Vec2::new(160., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    // steps
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(162., FLOOR_0 + 4., 10.),
+        false,
+    );
+    create_box(
+        &mut commands,
+        Vec2::new(160., FLOOR_0 + 3.),
+        Vec2::new(164., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(166., FLOOR_0 + 7., 10.),
+        false,
+    );
+    create_box(
+        &mut commands,
+        Vec2::new(164., FLOOR_0 + 6.),
+        Vec2::new(168., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(170., FLOOR_0 + 10., 10.),
+        false,
+    );
+    create_box(
+        &mut commands,
+        Vec2::new(168., FLOOR_0 + 9.),
+        Vec2::new(172., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    spawn_enemy(
+        &mut commands,
+        &texture_handles,
+        Vec3::new(174., FLOOR_0 + 13., 10.),
+        false,
+    );
+    create_box(
+        &mut commands,
+        Vec2::new(172., FLOOR_0 + 12.),
+        Vec2::new(176., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    // big gap, finish platform
+    create_box(
+        &mut commands,
+        Vec2::new(188., FLOOR_0),
+        Vec2::new(220., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
 }
 
 fn despawn_level(commands: Commands, query: Query<Entity, With<InGameItem>>) {
