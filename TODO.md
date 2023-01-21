@@ -27,6 +27,8 @@ TODO: full respect meter win state
 
 TODO: color moving/static enemies
 
+TODO: intro, multiple ending cutscenes
+
 
 ## SCOPE CREEP
 
