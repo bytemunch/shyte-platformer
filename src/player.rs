@@ -16,7 +16,7 @@ use crate::{
 #[derive(Component)]
 pub struct Player {
     jump_start: f32,
-    can_jump: Timer,
+    pub can_jump: Timer,
 }
 
 pub struct PlayerPlugin;

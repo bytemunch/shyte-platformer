@@ -15,8 +15,6 @@ BUG: enemies don't bounce off eachother
 
 ## TODOS
 
-TODO: Coyote time: ignore gravity while active
-
 TODO: animate chalk
 
 TODO: respect meter, fills as percentage of enemies killed

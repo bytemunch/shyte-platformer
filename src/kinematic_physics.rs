@@ -99,13 +99,7 @@ fn player_kill_enemy(
 
 fn player_enemy_collision(
     mut commands: Commands,
-    mut q_player: Query<
-        (
-            Entity,
-            &KinematicCharacterControllerOutput,
-        ),
-        With<Player>,
-    >,
+    mut q_player: Query<(Entity, &KinematicCharacterControllerOutput), With<Player>>,
     q_killboxes: Query<Entity, With<KillPlayerHitbox>>,
 ) {
     for (player, output) in q_player.iter_mut() {
@@ -160,13 +154,20 @@ fn kinematic_gravity(
             &mut CCAcceleration,
             &mut CCVelocity,
             &KinematicCharacterControllerOutput,
+            Option<&Player>,
         ),
         With<KinematicGravity>,
     >,
 ) {
-    for (mut acc, mut vel, output) in &mut query {
+    for (mut acc, mut vel, output, player) in &mut query {
         if !output.grounded {
-            acc.0.y -= CC_GRAVITY;
+            if let Some(player) = player {
+                if player.can_jump.finished() {
+                    acc.0.y -= CC_GRAVITY;
+                }
+            } else {
+                acc.0.y -= CC_GRAVITY;
+            }
         }
 
         if output.grounded && vel.0.y < 0. {
