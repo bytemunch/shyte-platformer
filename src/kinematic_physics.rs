@@ -54,23 +54,25 @@ impl Plugin for KinematicPhysics {
                             .label(SystemOrderLabel::Collisions)
                             .after(kinematic_gravity),
                     )
-                    // .with_system(collision_test.after(kinematic_gravity))
                     .with_system(move_enemies.after(kinematic_gravity))
                     .with_system(enemy_bounce_off_wall.after(kinematic_gravity))
                     .with_system(
                         kinematic_set_velocity
+                            .after(move_enemies)
                             .after(kinematic_gravity)
                             .after(SystemOrderLabel::Collisions)
                             .after(kinematic_apply_friction), // .after(collision_test),
                     )
                     .with_system(
                         player_max_speed
+                            .after(move_enemies)
                             .after(kinematic_set_velocity)
                             .after(SystemOrderLabel::Collisions)
                             .before(kinematic_apply_velocity),
                     )
                     .with_system(
                         enemy_max_speed
+                            .after(move_enemies)
                             .after(kinematic_set_velocity)
                             .after(SystemOrderLabel::Collisions)
                             .before(kinematic_apply_velocity),
