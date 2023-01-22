@@ -83,6 +83,9 @@ pub fn spawn_enemy(
     let mut fade_out = Vec::new();
     fade_out.push(ColorPoint::new(Color::WHITE, 0.));
     fade_out.push(ColorPoint::new(Color::NONE, 1.));
+
+    let enemy_color = if mover { Color::BLUE } else { Color::GREEN };
+
     // Enemy
     let e = commands
         .spawn(EnemyBundle {
@@ -136,7 +139,7 @@ pub fn spawn_enemy(
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_body.clone().unwrap(),
                 sprite: Sprite {
-                    color: Color::BLUE,
+                    color: enemy_color,
                     custom_size: sprite_size,
                     ..default()
                 },

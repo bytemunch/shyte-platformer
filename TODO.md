@@ -19,8 +19,6 @@ TODO: animate chalk
 
 TODO: respect meter, fills as percentage of enemies killed
 
-TODO: color moving/static enemies
-
 TODO: intro, multiple ending cutscenes based on respect meter
 
 ## SCOPE CREEP
