@@ -15,8 +15,6 @@ BUG: enemies don't bounce off eachother
 
 ## TODOS
 
-TODO: respect meter, fills as percentage of enemies killed
-
 TODO: intro, multiple ending cutscenes based on respect meter
 
 ## LATER

@@ -51,6 +51,8 @@ pub struct TextureHandles {
     chalk_line_horizontal: Option<Handle<Image>>,
     chalk_box_fill: Option<Handle<Image>>,
     crosshair: Option<Handle<Image>>,
+    respect_bar: Option<Handle<Image>>,
+    respect_fill: Option<Handle<Image>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemLabel)]
@@ -107,6 +109,8 @@ fn load_textures(mut commands: Commands, asset_server: Res<AssetServer>) {
         char_face_laughing: asset_server.load("img/character/face_laughing.png").into(),
         ha: asset_server.load("img/ha.png").into(),
         crosshair: asset_server.load("img/crosshair.png").into(),
+        respect_bar: asset_server.load("img/respect_bar.png").into(),
+        respect_fill: asset_server.load("img/respect_bar_fill.png").into(),
         chalk_line_horizontal: None,
         chalk_box_fill: None,
     });

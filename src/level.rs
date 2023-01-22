@@ -5,7 +5,7 @@ use bevy_rapier2d::prelude::*;
 use iyes_loopless::prelude::{AppLooplessStateExt, ConditionHelpers, IntoConditionalSystem};
 
 use crate::{
-    enemy::spawn_enemy,
+    enemy::{spawn_enemy, Enemy},
     player::spawn_player,
     states::{GameState, PauseState},
     util::despawn_with,
@@ -18,12 +18,14 @@ impl Plugin for LevelPlugin {
         app
             // ingame transitions
             .add_enter_system(GameState::InGame, setup_level)
+            .add_enter_system(GameState::InGame, setup_ingame_ui.after(setup_level))
             .add_exit_system(GameState::InGame, despawn_level)
             .add_system(
                 actor_fall_out
                     .run_in_state(GameState::InGame)
                     .run_in_state(PauseState::Running),
-            );
+            )
+            .add_system(update_respect_meter.run_in_state(GameState::InGame));
     }
 }
 
@@ -204,6 +206,78 @@ pub fn create_box(
             });
         })
         .id()
+}
+
+#[derive(Component)]
+struct RespectBarFill;
+
+const BAR_HEIGHT: f32 = 66.;
+const BAR_WIDTH: f32 = BAR_HEIGHT * 4.;
+const FILL_MARGIN: f32 = 0.05;
+const FILL_WIDTH: f32 = BAR_WIDTH * (1. - FILL_MARGIN * 2.);
+const TOTAL_ENEMIES: f32 = 14.;
+
+fn setup_ingame_ui(mut commands: Commands, texture_handles: Res<TextureHandles>) {
+    // respect bar
+    commands
+        .spawn(NodeBundle {
+            style: Style {
+                position_type: PositionType::Absolute,
+                size: Size::new(Val::Px(BAR_WIDTH), Val::Px(BAR_HEIGHT)),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(InGameItem)
+        .with_children(|cb| {
+            // bar outline
+            cb.spawn(ImageBundle {
+                image: UiImage(texture_handles.respect_bar.clone().unwrap()),
+                style: Style {
+                    size: Size::new(Val::Px(BAR_WIDTH), Val::Px(BAR_HEIGHT)),
+                    position_type: PositionType::Absolute,
+
+                    ..default()
+                },
+                ..default()
+            });
+
+            // fill clip
+            cb.spawn(NodeBundle {
+                style: Style {
+                    overflow: Overflow::Hidden,
+                    position_type: PositionType::Absolute,
+                    size: Size::new(Val::Px(FILL_WIDTH), Val::Px(BAR_HEIGHT)),
+                    position: UiRect {
+                        left: Val::Percent(FILL_MARGIN * 100.),
+                        ..default()
+                    },
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(RespectBarFill)
+            .with_children(|cb| {
+                // fill
+                cb.spawn(ImageBundle {
+                    image: UiImage(texture_handles.respect_fill.clone().unwrap()),
+                    style: Style {
+                        position_type: PositionType::Absolute,
+                        size: Size::new(Val::Px(FILL_WIDTH), Val::Px(BAR_HEIGHT)),
+                        ..default()
+                    },
+                    ..default()
+                });
+            });
+        });
+}
+
+fn update_respect_meter(
+    mut q_respect_style: Query<&mut Style, With<RespectBarFill>>,
+    q_enemies: Query<&Enemy>,
+) {
+    let pc: f32 = 1. - q_enemies.iter().count() as f32 / (TOTAL_ENEMIES);
+    q_respect_style.single_mut().size.width = Val::Px(FILL_WIDTH * pc);
 }
 
 fn setup_level(
