@@ -9,8 +9,6 @@ BUG: player sticks to walls AND ceilings
 BUG: jittery enemy movement SOMETIMES, ordering issue. (likely all movement is 
 jittery, camera moving masks it)
 
-BUG: enemy still moves when paused
-
 BUG: enemies don't bounce off eachother
 
 ## TODOS

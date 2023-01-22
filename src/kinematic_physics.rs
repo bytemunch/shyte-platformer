@@ -1,9 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use iyes_loopless::state::CurrentState;
 
 use crate::{
     enemy::{Enemy, EnemyMover, KillEnemyHitbox, KillPlayerHitbox},
     player::Player,
+    states::PauseState,
     ActorDead, SystemOrderLabel,
 };
 
@@ -158,21 +160,24 @@ fn kinematic_gravity(
         ),
         With<KinematicGravity>,
     >,
+    pause_state: Res<CurrentState<PauseState>>,
 ) {
     for (mut acc, mut vel, output, player) in &mut query {
-        if !output.grounded {
-            if let Some(player) = player {
-                if player.can_jump.finished() {
+        if pause_state.0 == PauseState::Running {
+            if !output.grounded {
+                if let Some(player) = player {
+                    if player.can_jump.finished() {
+                        acc.0.y -= CC_GRAVITY;
+                    }
+                } else {
                     acc.0.y -= CC_GRAVITY;
                 }
-            } else {
-                acc.0.y -= CC_GRAVITY;
             }
-        }
 
-        if output.grounded && vel.0.y < 0. {
-            vel.0.y = 0.;
-            acc.0.y = 0.;
+            if output.grounded && vel.0.y < 0. {
+                vel.0.y = 0.;
+                acc.0.y = 0.;
+            }
         }
     }
 }
@@ -195,9 +200,14 @@ fn kinematic_set_velocity(mut query: Query<(&CCAcceleration, &mut CCVelocity)>) 
     }
 }
 
-fn kinematic_apply_velocity(mut query: Query<(&mut KinematicCharacterController, &CCVelocity)>) {
+fn kinematic_apply_velocity(
+    mut query: Query<(&mut KinematicCharacterController, &CCVelocity)>,
+    pause_state: Res<CurrentState<PauseState>>,
+) {
     for (mut controller, vel) in &mut query {
-        controller.translation = Some(vel.0);
+        if pause_state.0 == PauseState::Running {
+            controller.translation = Some(vel.0);
+        }
     }
 }
 
