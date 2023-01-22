@@ -82,7 +82,7 @@ pub fn spawn_player(commands: &mut Commands, texture_handles: &TextureHandles, p
         .insert(InGameItem)
         .insert(Actor)
         .insert(SpriteBundle {
-            texture: texture_handles.char_outline.clone(),
+            texture: texture_handles.char_outline.clone().unwrap(),
             sprite: Sprite {
                 color: Color::WHITE,
                 custom_size: sprite_size,
@@ -93,7 +93,7 @@ pub fn spawn_player(commands: &mut Commands, texture_handles: &TextureHandles, p
         })
         .with_children(|f| {
             f.spawn(SpriteBundle {
-                texture: texture_handles.char_body.clone(),
+                texture: texture_handles.char_body.clone().unwrap(),
                 sprite: Sprite {
                     color: Color::RED,
                     custom_size: sprite_size,
@@ -105,7 +105,7 @@ pub fn spawn_player(commands: &mut Commands, texture_handles: &TextureHandles, p
         })
         .with_children(|f| {
             f.spawn(SpriteBundle {
-                texture: texture_handles.char_face_angry.clone(),
+                texture: texture_handles.char_face_angry.clone().unwrap(),
                 sprite: Sprite {
                     color: Color::WHITE,
                     custom_size: sprite_size,

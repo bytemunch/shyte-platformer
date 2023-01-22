@@ -89,7 +89,7 @@ fn setup_level_editor(
 
     commands
         .spawn(SpriteBundle {
-            texture: texture_handles.crosshair.clone(),
+            texture: texture_handles.crosshair.clone().unwrap(),
             transform: Transform::from_xyz(0.0, 0.0, 10.0),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(1., 1.)),

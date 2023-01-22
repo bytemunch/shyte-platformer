@@ -17,18 +17,13 @@ BUG: enemies don't bounce off eachother
 
 TODO: Coyote time: ignore gravity while active
 
-TODO: fill in box graphics
-
 TODO: animate chalk
 
 TODO: respect meter, fills as percentage of enemies killed
 
-TODO: full respect meter win state
-
 TODO: color moving/static enemies
 
-TODO: intro, multiple ending cutscenes
-
+TODO: intro, multiple ending cutscenes based on respect meter
 
 ## SCOPE CREEP
 

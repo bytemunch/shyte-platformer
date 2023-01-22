@@ -95,7 +95,7 @@ pub fn spawn_enemy(
         .with_children(|cb| {
             cb.spawn(ParticleSystemBundle {
                 particle_system: ParticleSystem {
-                    texture: ParticleTexture::Sprite(texture_handles.ha.clone()),
+                    texture: ParticleTexture::Sprite(texture_handles.ha.clone().unwrap()),
                     spawn_rate_per_second: 4.0.into(),
                     spawn_radius: 1.0.into(),
                     initial_speed: JitteredValue::jittered(1.5, -0.5..0.5),
@@ -124,7 +124,7 @@ pub fn spawn_enemy(
                 .insert(KillEnemyHitbox);
 
             cb.spawn(SpriteBundle {
-                texture: texture_handles.char_outline.clone(),
+                texture: texture_handles.char_outline.clone().unwrap(),
                 sprite: Sprite {
                     color: Color::WHITE,
                     custom_size: sprite_size,
@@ -134,7 +134,7 @@ pub fn spawn_enemy(
             });
 
             cb.spawn(SpriteBundle {
-                texture: texture_handles.char_body.clone(),
+                texture: texture_handles.char_body.clone().unwrap(),
                 sprite: Sprite {
                     color: Color::BLUE,
                     custom_size: sprite_size,
@@ -144,7 +144,7 @@ pub fn spawn_enemy(
             });
 
             cb.spawn(SpriteBundle {
-                texture: texture_handles.char_face_laughing.clone(),
+                texture: texture_handles.char_face_laughing.clone().unwrap(),
                 sprite: Sprite {
                     color: Color::WHITE,
                     custom_size: sprite_size,

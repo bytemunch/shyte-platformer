@@ -86,6 +86,7 @@ pub fn create_box(
 
     let mut x_mesh = Mesh::from(shape::Quad::new(Vec2::new(w, 2.5)));
     let mut y_mesh = Mesh::from(shape::Quad::new(Vec2::new(h, 2.5)));
+    let mut inner_mesh = Mesh::from(shape::Quad::new(Vec2::new(w, h)));
 
     if let Some(VertexAttributeValues::Float32x2(uvs)) = x_mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0)
     {
@@ -100,6 +101,15 @@ pub fn create_box(
         for uv in uvs {
             uv[1] *= 4.;
             uv[0] *= 16. * h / UV_MAGIC_NUMBER;
+        }
+    }
+
+    if let Some(VertexAttributeValues::Float32x2(uvs)) =
+        inner_mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0)
+    {
+        for uv in uvs {
+            uv[0] *= w / 5.;
+            uv[1] *= h / 5.;
         }
     }
 
@@ -140,12 +150,21 @@ pub fn create_box(
             )));
 
             // Graphics
+            // INNER
+            cb.spawn(MaterialMesh2dBundle {
+                mesh: meshes.add(inner_mesh.clone().into()).into(),
+                material: materials.add(ColorMaterial {
+                    texture: Some(texture_handles.chalk_box_fill.clone().unwrap()),
+                    ..default()
+                }),
+                ..default()
+            });
             // TOP
             cb.spawn(MaterialMesh2dBundle {
                 mesh: meshes.add(x_mesh.clone().into()).into(),
                 transform: Transform::from_xyz(0.0, hy - 1., 0.0),
                 material: materials.add(ColorMaterial {
-                    texture: Some(texture_handles.chalk_line_horizontal.clone()),
+                    texture: Some(texture_handles.chalk_line_horizontal.clone().unwrap()),
                     ..default()
                 }),
                 ..default()
@@ -156,7 +175,7 @@ pub fn create_box(
                 transform: Transform::from_xyz(-hx + 1., 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_z(PI / 2.)),
                 material: materials.add(ColorMaterial {
-                    texture: Some(texture_handles.chalk_line_horizontal.clone()),
+                    texture: Some(texture_handles.chalk_line_horizontal.clone().unwrap()),
                     ..default()
                 }),
                 ..default()
@@ -167,7 +186,7 @@ pub fn create_box(
                 transform: Transform::from_xyz(hx - 1., 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_z(-PI / 2.)),
                 material: materials.add(ColorMaterial {
-                    texture: Some(texture_handles.chalk_line_horizontal.clone()),
+                    texture: Some(texture_handles.chalk_line_horizontal.clone().unwrap()),
                     ..default()
                 }),
                 ..default()
@@ -178,7 +197,7 @@ pub fn create_box(
                 transform: Transform::from_xyz(0.0, -hy + 1., 0.0)
                     .with_rotation(Quat::from_rotation_z(PI)),
                 material: materials.add(ColorMaterial {
-                    texture: Some(texture_handles.chalk_line_horizontal.clone()),
+                    texture: Some(texture_handles.chalk_line_horizontal.clone().unwrap()),
                     ..default()
                 }),
                 ..default()
@@ -203,7 +222,7 @@ fn setup_level(
     spawn_player(
         &mut commands,
         &texture_handles,
-        Vec3::new(80., FLOOR_1 + 1., 10.),
+        Vec3::new(0., FLOOR_1 + 1., 10.),
     );
 
     // first static enemy
