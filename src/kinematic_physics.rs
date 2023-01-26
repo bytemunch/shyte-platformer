@@ -4,6 +4,7 @@ use iyes_loopless::state::CurrentState;
 
 use crate::{
     enemy::{Enemy, EnemyMover, KillEnemyHitbox, KillPlayerHitbox},
+    level::TagBox,
     player::Player,
     states::PauseState,
     ActorDead, SystemOrderLabel,
@@ -77,9 +78,61 @@ impl Plugin for KinematicPhysics {
                             .after(SystemOrderLabel::Collisions)
                             .before(kinematic_apply_velocity),
                     )
+                    .with_system(player_wall_raycast.before(kinematic_set_velocity))
                     .with_system(kinematic_apply_velocity.after(kinematic_set_velocity))
                     .after(SystemOrderLabel::Input),
             );
+    }
+}
+
+fn player_wall_raycast(
+    rapier_context: Res<RapierContext>,
+    mut q_player: Query<(Entity, &Transform, &mut CCVelocity, &mut CCAcceleration), With<Player>>,
+    q_walls: Query<Entity, With<TagBox>>,
+) {
+    if let Ok((player, player_transform, mut vel, mut acc)) = q_player.get_single_mut() {
+        let max_toi = 1.0;
+        let ray_origin = Vec2::new(
+            player_transform.translation.x,
+            player_transform.translation.y,
+        );
+        let ray_dir = Vec2::new(1.0, 0.0);
+        let solid = true;
+        let filter = QueryFilter::default().exclude_rigid_body(player);
+
+        let mut callback = |entity, intersection: RayIntersection| {
+            if let Ok(_wall) = q_walls.get(entity) {
+                let hit_normal = intersection.normal;
+
+                if (vel.0.x > 0. || acc.0.x > 0.) && hit_normal.x < 0. {
+                    vel.0.x = 0.;
+                    acc.0.x = 0.;
+                } else if (vel.0.x < 0. || acc.0.x < 0.) && hit_normal.x > 0. {
+                    vel.0.x = 0.;
+                    acc.0.x = 0.;
+                }
+            }
+
+            true
+        };
+
+        rapier_context.intersections_with_ray(
+            ray_origin,
+            ray_dir,
+            max_toi,
+            solid,
+            filter,
+            &mut callback,
+        );
+
+        rapier_context.intersections_with_ray(
+            ray_origin,
+            ray_dir * -1.,
+            max_toi,
+            solid,
+            filter,
+            callback,
+        );
     }
 }
 

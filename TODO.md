@@ -2,9 +2,7 @@
 
 ## BUGS
 
-BUG: cannot jump when pusing against wall. Character controller offset?
-
-BUG: player sticks to walls AND ceilings
+BUG: player sticks to ceilings
 
 BUG: enemies don't bounce off eachother
 
@@ -33,6 +31,9 @@ CREEP: level editor
 CREEP: level loader
 
 CREEP: 9-Patch box drawing
+
+-- look into sensors?
+--- experiment with sensors as child objects in scratchpad, as they seem to behave oddly
 
 ## REFACS
 

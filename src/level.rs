@@ -309,6 +309,15 @@ fn setup_level(
 
     create_box(
         &mut commands,
+        Vec2::new(-10., FLOOR_1),
+        Vec2::new(0., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    create_box(
+        &mut commands,
         Vec2::new(0., FLOOR_0),
         Vec2::new(15., FLOOR_0_BOTTOM),
         &texture_handles,
