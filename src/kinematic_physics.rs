@@ -4,8 +4,8 @@ use iyes_loopless::state::CurrentState;
 
 use crate::{
     enemy::{Enemy, EnemyMover, KillEnemyHitbox, KillPlayerHitbox},
-    level::TagBox,
-    player::Player,
+    level::Wall,
+    player::{Player},
     states::PauseState,
     ActorDead, SystemOrderLabel,
 };
@@ -88,7 +88,7 @@ impl Plugin for KinematicPhysics {
 fn player_wall_raycast(
     rapier_context: Res<RapierContext>,
     mut q_player: Query<(Entity, &Transform, &mut CCVelocity, &mut CCAcceleration), With<Player>>,
-    q_walls: Query<Entity, With<TagBox>>,
+    q_walls: Query<Entity, With<Wall>>,
 ) {
     if let Ok((player, player_transform, mut vel, mut acc)) = q_player.get_single_mut() {
         let max_toi = 1.0;

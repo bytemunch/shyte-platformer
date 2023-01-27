@@ -30,7 +30,7 @@ impl Plugin for LevelPlugin {
 }
 
 #[derive(Component)]
-pub struct TagBox;
+pub struct Wall;
 
 #[derive(Component)]
 struct BoxTopLeft(Vec2);
@@ -45,7 +45,7 @@ struct BoxBundle {
     collider: Collider,
     transform_bundle: TransformBundle,
 
-    _tag: TagBox,
+    _tag: Wall,
     _igi: InGameItem,
     _vb: VisibilityBundle,
 }
@@ -58,7 +58,7 @@ impl Default for BoxBundle {
             collider: Collider::cuboid(5.0, 5.0),
             transform_bundle: TransformBundle::from_transform(Transform::from_xyz(0.0, 0.0, 0.0)),
 
-            _tag: TagBox,
+            _tag: Wall,
             _igi: InGameItem,
             _vb: VisibilityBundle::default(),
         }
