@@ -7,6 +7,7 @@ pub enum GameState {
     InGame,
     LevelEditor,
     Dead,
+    IntroCutscene,// TODO cutscene sub state
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

@@ -10,6 +10,7 @@ bevy = { version = "0.9.1", features = ["dynamic"] }
 bevy-parallax = "0.3.0"
 bevy_particle_systems = "0.7.0"
 bevy_rapier2d = "0.20.0"
+bevy_tweening = "0.6.0"
 iyes_loopless = "0.9.1"
 
 

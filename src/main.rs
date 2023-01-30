@@ -8,6 +8,7 @@ mod pause;
 mod player;
 mod states;
 mod util;
+mod cutscene;
 
 use background::BackgroundPlugin;
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
@@ -19,6 +20,7 @@ use bevy_rapier2d::prelude::*;
 
 use bevy_parallax::ParallaxCameraComponent;
 
+use cutscene::CutscenePlugin;
 use interfaces::UserInterfacesPlugin;
 use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
@@ -82,6 +84,7 @@ fn main() {
         .add_plugin(LevelPlugin)
         .add_plugin(KinematicPhysics)
         .add_plugin(LevelEditorPlugin)
+        .add_plugin(CutscenePlugin)
         // particles
         .add_plugin(ParticleSystemPlugin)
         // physics
