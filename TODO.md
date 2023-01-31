@@ -10,6 +10,54 @@ BUG: enemies don't bounce off eachother
 
 TODO: intro, multiple ending cutscenes based on respect meter
 
+TODO: make ActorGraphics bundle / helper function for use with ChildBuilder.
+
+NOTE: Parent/Child hierarchies are logical. It just adds the appropriate Parent/Children components to each entity. 
+    EG child gets the Parent component pointing to parent entity.
+
+NOTE: Bundles are only used when instantiating. Components are all that is attached to entities.
+
+NOTE: Adding multiple of the same component overwrites previous component.
+
+### CUTSCENES
+
+CutsceneActor
+
+INTRO:
+
+npc is stage center right
+
+mr shyte enters from stage left
+
+mr.s: "hello there, i'm mr shyte"
+
+npc: "mr... shyte..?"
+
+npc begins to laugh
+
+mr shyte gets angrier and angrier
+
+END INTRO
+
+Enemy:
+Entity
+    SpatialBundle
+    --children
+        BodySprite
+        OutlineSprite
+        FaceSprite: Switches when starting to laugh
+        ParticleSystem: Activates when starting to laugh
+
+Player:
+Entity
+    SpatialBundle
+    --children
+        BodySpriteBack
+        BodySpriteFront: Replaces back sprite from bottom to top when being laughed at
+        OutlineSprite
+        FaceSprite
+        ParticleSystem: Angry particles when enraged
+
 ## LATER
 
 TODO: animate chalk

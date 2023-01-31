@@ -20,6 +20,7 @@ use bevy_rapier2d::prelude::*;
 
 use bevy_parallax::ParallaxCameraComponent;
 
+use bevy_tweening::TweeningPlugin;
 use cutscene::CutscenePlugin;
 use interfaces::UserInterfacesPlugin;
 use kinematic_physics::KinematicPhysics;
@@ -49,6 +50,7 @@ pub struct TextureHandles {
     char_outline: Option<Handle<Image>>,
     char_face_angry: Option<Handle<Image>>,
     char_face_laughing: Option<Handle<Image>>,
+    char_face_neutral: Option<Handle<Image>>,
     ha: Option<Handle<Image>>,
     chalk_line_horizontal: Option<Handle<Image>>,
     chalk_box_fill: Option<Handle<Image>>,
@@ -85,6 +87,8 @@ fn main() {
         .add_plugin(KinematicPhysics)
         .add_plugin(LevelEditorPlugin)
         .add_plugin(CutscenePlugin)
+        // bevy_tween
+        .add_plugin(TweeningPlugin)
         // particles
         .add_plugin(ParticleSystemPlugin)
         // physics
@@ -116,6 +120,7 @@ fn load_textures(mut commands: Commands, asset_server: Res<AssetServer>) {
         respect_fill: asset_server.load("img/respect_bar_fill.png").into(),
         chalk_line_horizontal: None,
         chalk_box_fill: None,
+        char_face_neutral: asset_server.load("img/character/face_neutral.png").into()
     });
     commands.insert_resource(RepeatX {
         handle: asset_server.load("img/chalk_line_horizontal.png"),
