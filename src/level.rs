@@ -280,30 +280,31 @@ fn update_respect_meter(
     q_respect_style.single_mut().size.width = Val::Px(FILL_WIDTH * pc);
 }
 
+// todo: enum
+pub const FLOOR_0: f32 = -10.;
+pub const FLOOR_1: f32 = 0.;
+pub const FLOOR_0_BOTTOM: f32 = -15.;
+pub const FLOOR_1_BOTTOM: f32 = -5.;
+
 fn setup_level(
     mut commands: Commands,
     texture_handles: Res<TextureHandles>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    const FLOOR_0: f32 = -10.;
-    const FLOOR_1: f32 = 0.;
-    const FLOOR_0_BOTTOM: f32 = -15.;
-    const FLOOR_1_BOTTOM: f32 = -5.;
-
     // const MAX_JUMP: f32 = 12.;
 
     spawn_player(
         &mut commands,
         &texture_handles,
-        Vec3::new(0., FLOOR_1 + 1., 10.),
+        Vec3::new(0., FLOOR_0 + 0.8, 10.),
     );
 
     // first static enemy
     spawn_enemy(
         &mut commands,
         &texture_handles,
-        Vec3::new(10.0, FLOOR_0 + 1.0, 10.0),
+        Vec3::new(10.0, FLOOR_0 + 0.8, 10.0),
         false,
     );
 
@@ -329,7 +330,7 @@ fn setup_level(
     spawn_enemy(
         &mut commands,
         &texture_handles,
-        Vec3::new(25.0, FLOOR_0 + 1.0, 10.0),
+        Vec3::new(25.0, FLOOR_0 + 0.8, 10.0),
         true,
     );
 

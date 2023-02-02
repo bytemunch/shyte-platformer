@@ -7,7 +7,13 @@ use iyes_loopless::{
     state::NextState,
 };
 
-use crate::{player::PLAYER_RADIUS, states::GameState, util::despawn_with, TextureHandles};
+use crate::{
+    level::{create_box, FLOOR_0, FLOOR_0_BOTTOM, FLOOR_1},
+    player::PLAYER_RADIUS,
+    states::GameState,
+    util::despawn_with,
+    TextureHandles,
+};
 
 #[derive(Component)]
 struct IntroCutsceneTag;
@@ -28,7 +34,17 @@ fn setup_intro_cutscene(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     texture_handles: Res<TextureHandles>,
+    mut q_camera_transform: Query<&mut Transform, With<Camera2d>>,
+
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    // set camera transfrom
+    if let Ok(mut t) = q_camera_transform.get_single_mut() {
+        t.translation.x = 20.;
+        t.translation.y = 0.;
+    }
+
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
 
     commands
@@ -42,10 +58,9 @@ fn setup_intro_cutscene(
         ))
         .insert(IntroCutsceneTag);
 
-    // enemy
+    // player
     commands
         .spawn(SpatialBundle {
-            transform: Transform::from_xyz(0., 0., 10.),
             ..default()
         })
         .insert(IntroCutsceneTag)
@@ -59,10 +74,49 @@ fn setup_intro_cutscene(
             // to animate it. It also contains the start and end values associated
             // with the animation ratios 0. and 1.
             TransformPositionLens {
-                start: Vec3::new(0., 0., 10.),
-                end: Vec3::new(10., 0., 10.),
+                start: Vec3::new(-10., FLOOR_0 + 0.8, 10.),
+                end: Vec3::new(0., FLOOR_0 + 0.8, 10.),
             },
         )))
+        .with_children(|cb| {
+            cb.spawn(SpriteBundle {
+                texture: texture_handles.char_outline.clone().unwrap(),
+                sprite: Sprite {
+                    color: Color::WHITE,
+                    custom_size: sprite_size,
+                    ..default()
+                },
+                ..default()
+            });
+
+            cb.spawn(SpriteBundle {
+                texture: texture_handles.char_body.clone().unwrap(),
+                sprite: Sprite {
+                    color: Color::YELLOW,
+                    custom_size: sprite_size,
+                    ..default()
+                },
+                ..default()
+            });
+
+            cb.spawn(SpriteBundle {
+                texture: texture_handles.char_face_neutral.clone().unwrap(),
+                sprite: Sprite {
+                    color: Color::WHITE,
+                    custom_size: sprite_size,
+                    ..default()
+                },
+                ..default()
+            });
+        });
+
+    // enemy
+    commands
+        .spawn(SpatialBundle {
+            transform: Transform::from_xyz(10., FLOOR_0 + 0.8, 10.),
+            ..default()
+        })
+        .insert(IntroCutsceneTag)
         .with_children(|cb| {
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_outline.clone().unwrap(),
@@ -94,6 +148,89 @@ fn setup_intro_cutscene(
                 ..default()
             });
         });
+
+    // enemy 2
+    commands
+        .spawn(SpatialBundle {
+            transform: Transform::from_xyz(25., FLOOR_0 + 0.8, 10.),
+            ..default()
+        })
+        .insert(IntroCutsceneTag)
+        .with_children(|cb| {
+            cb.spawn(SpriteBundle {
+                texture: texture_handles.char_outline.clone().unwrap(),
+                sprite: Sprite {
+                    color: Color::WHITE,
+                    custom_size: sprite_size,
+                    ..default()
+                },
+                ..default()
+            });
+
+            cb.spawn(SpriteBundle {
+                texture: texture_handles.char_body.clone().unwrap(),
+                sprite: Sprite {
+                    color: Color::BLUE, // todo: const enum of enemy colors
+                    custom_size: sprite_size,
+                    ..default()
+                },
+                ..default()
+            });
+
+            cb.spawn(SpriteBundle {
+                texture: texture_handles.char_face_neutral.clone().unwrap(),
+                sprite: Sprite {
+                    color: Color::WHITE,
+                    custom_size: sprite_size,
+                    ..default()
+                },
+                ..default()
+            });
+        });
+
+    // should have vec of tl/br tuples, iterate over and create boxes
+    // for now we sidestep the borrow checker this messy awful way :)
+
+    let b1 = create_box(
+        &mut commands,
+        Vec2::new(-20., 100.),
+        Vec2::new(-10., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    let b2 = create_box(
+        &mut commands,
+        Vec2::new(-10., FLOOR_0),
+        Vec2::new(15., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    let b3 = create_box(
+        &mut commands,
+        Vec2::new(20., FLOOR_0),
+        Vec2::new(30., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    let b4 = create_box(
+        &mut commands,
+        Vec2::new(30., FLOOR_1),
+        Vec2::new(50., FLOOR_0_BOTTOM),
+        &texture_handles,
+        &mut meshes,
+        &mut materials,
+    );
+
+    commands.entity(b1).insert(IntroCutsceneTag);
+    commands.entity(b2).insert(IntroCutsceneTag);
+    commands.entity(b3).insert(IntroCutsceneTag);
+    commands.entity(b4).insert(IntroCutsceneTag);
 
     commands
         .spawn(ActiveCutsceneTimer(Timer::from_seconds(
