@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_tweening::{lens::TransformPositionLens, Animator, EaseFunction, Tween};
+use bevy_tweening::{lens::TransformPositionLens, Animator, EaseFunction, Lens, Tween};
 use iyes_loopless::{
     prelude::{AppLooplessStateExt, IntoConditionalSystem},
     state::NextState,
@@ -12,7 +12,7 @@ use crate::{
     player::PLAYER_RADIUS,
     states::GameState,
     util::despawn_with,
-    TextureHandles,
+    TextureHandles, CAMERA_SCALE,
 };
 
 #[derive(Component)]
@@ -30,19 +30,79 @@ impl Plugin for CutscenePlugin {
     }
 }
 
+// camera zoom lens
+
+struct OrthographicProjectionScaleLens {
+    start: f32,
+    end: f32,
+}
+
+impl Lens<OrthographicProjection> for OrthographicProjectionScaleLens {
+    fn lerp(&mut self, target: &mut OrthographicProjection, ratio: f32) {
+        let start = self.start;
+        let end = self.end;
+
+        target.scale = start + (end - start) * ratio;
+    }
+}
+
 fn setup_intro_cutscene(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     texture_handles: Res<TextureHandles>,
-    mut q_camera_transform: Query<&mut Transform, With<Camera2d>>,
+    mut q_camera_transform: Query<(Entity, &mut Transform), With<Camera2d>>,
 
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    let cam_scale_1 = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(2.5),
+        OrthographicProjectionScaleLens {
+            start: CAMERA_SCALE,
+            end: CAMERA_SCALE * 0.5,
+        },
+    );
+
+    let cam_scale_2 = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(0.5),
+        OrthographicProjectionScaleLens {
+            end: CAMERA_SCALE,
+            start: CAMERA_SCALE * 0.5,
+        },
+    );
+
+    let cam_translate_1 = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(2.5),
+        TransformPositionLens {
+            start: Vec3::new(20., 0., 0.),
+            end: Vec3::new(0., 0., 0.),
+        },
+    );
+
+    let cam_translate_2 = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(0.5),
+        TransformPositionLens {
+            start: Vec3::new(0., 0., 0.),
+            end: Vec3::new(20., 0., 0.),
+        },
+    );
+
+    let cam_animator_translate = Animator::new(cam_translate_1.then(cam_translate_2));
+    let cam_animator_scale = Animator::new(cam_scale_1.then(cam_scale_2));
+
     // set camera transfrom
-    if let Ok(mut t) = q_camera_transform.get_single_mut() {
+    if let Ok((camera, mut t)) = q_camera_transform.get_single_mut() {
         t.translation.x = 20.;
         t.translation.y = 0.;
+
+        commands
+            .entity(camera)
+            .insert(cam_animator_translate)
+            .insert(cam_animator_scale);
     }
 
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
@@ -60,9 +120,7 @@ fn setup_intro_cutscene(
 
     // player
     commands
-        .spawn(SpatialBundle {
-            ..default()
-        })
+        .spawn(SpatialBundle { ..default() })
         .insert(IntroCutsceneTag)
         .insert(Animator::new(Tween::new(
             // Use a quadratic easing on both endpoints.
