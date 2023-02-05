@@ -1,7 +1,10 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_tweening::{lens::TransformPositionLens, Animator, EaseFunction, Lens, Tween};
+use bevy_tweening::{
+    component_animator_system, lens::TransformPositionLens, Animator, Delay, EaseFunction, Lens,
+    Tween, TweenCompleted,
+};
 use iyes_loopless::{
     prelude::{AppLooplessStateExt, IntoConditionalSystem},
     state::NextState,
@@ -24,14 +27,15 @@ pub struct CutscenePlugin;
 
 impl Plugin for CutscenePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(check_cutscene_over.run_in_state(GameState::IntroCutscene))
+        app.add_system(component_animator_system::<OrthographicProjection>)
+            .add_system(check_cutscene_over.run_in_state(GameState::IntroCutscene))
             .add_enter_system(GameState::IntroCutscene, setup_intro_cutscene)
             .add_exit_system(GameState::IntroCutscene, despawn_intro_cutscene);
     }
 }
 
 // camera zoom lens
-
+#[derive(Debug, Copy, Clone, PartialEq)]
 struct OrthographicProjectionScaleLens {
     start: f32,
     end: f32,
@@ -41,8 +45,9 @@ impl Lens<OrthographicProjection> for OrthographicProjectionScaleLens {
     fn lerp(&mut self, target: &mut OrthographicProjection, ratio: f32) {
         let start = self.start;
         let end = self.end;
+        let value = start + (end - start) * ratio;
 
-        target.scale = start + (end - start) * ratio;
+        target.scale = value;
     }
 }
 
@@ -50,55 +55,72 @@ fn setup_intro_cutscene(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     texture_handles: Res<TextureHandles>,
-    mut q_camera_transform: Query<(Entity, &mut Transform), With<Camera2d>>,
+    mut q_camera: Query<Entity, With<Camera2d>>,
 
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+
+    const TALK_DELAY: f32 = 3.;
+    const ZOOM_IN_TIME: f32 = 2.5;
+    const ZOOM_OUT_TIME: f32 = 0.5;
+    const ZOOM_Y_OFFSET: f32 = -5.;
+    const ZOOM_FACTOR: f32 = 0.5;
+
+
     let cam_scale_1 = Tween::new(
         EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(2.5),
+        Duration::from_secs_f32(ZOOM_IN_TIME),
         OrthographicProjectionScaleLens {
             start: CAMERA_SCALE,
-            end: CAMERA_SCALE * 0.5,
+            end: CAMERA_SCALE * ZOOM_FACTOR,
         },
     );
 
     let cam_scale_2 = Tween::new(
         EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(0.5),
+        Duration::from_secs_f32(ZOOM_OUT_TIME),
         OrthographicProjectionScaleLens {
             end: CAMERA_SCALE,
-            start: CAMERA_SCALE * 0.5,
+            start: CAMERA_SCALE * ZOOM_FACTOR,
         },
     );
 
     let cam_translate_1 = Tween::new(
         EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(2.5),
+        Duration::from_secs_f32(ZOOM_IN_TIME),
         TransformPositionLens {
             start: Vec3::new(20., 0., 0.),
-            end: Vec3::new(0., 0., 0.),
+            end: Vec3::new(3., ZOOM_Y_OFFSET, 0.),
         },
     );
 
     let cam_translate_2 = Tween::new(
         EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(0.5),
+        Duration::from_secs_f32(ZOOM_OUT_TIME),
         TransformPositionLens {
-            start: Vec3::new(0., 0., 0.),
+            start: Vec3::new(3., ZOOM_Y_OFFSET, 0.),
             end: Vec3::new(20., 0., 0.),
         },
-    );
+    )
+    .with_completed_event(0); // TODO enum for user_data values
 
-    let cam_animator_translate = Animator::new(cam_translate_1.then(cam_translate_2));
-    let cam_animator_scale = Animator::new(cam_scale_1.then(cam_scale_2));
+    let cam_scale_talk_delay: Delay<OrthographicProjection> =
+        Delay::new(Duration::from_secs_f32(TALK_DELAY));
+    let cam_translate_talk_delay: Delay<Transform> =
+        Delay::new(Duration::from_secs_f32(TALK_DELAY));
 
-    // set camera transfrom
-    if let Ok((camera, mut t)) = q_camera_transform.get_single_mut() {
-        t.translation.x = 20.;
-        t.translation.y = 0.;
+    let cam_seq_translate = cam_translate_1
+        .then(cam_translate_talk_delay)
+        .then(cam_translate_2);
 
+    let cam_seq_scale = cam_scale_1.then(cam_scale_talk_delay).then(cam_scale_2);
+
+    let cam_animator_translate = Animator::new(cam_seq_translate);
+    let cam_animator_scale = Animator::new(cam_seq_scale);
+
+    // set camera transfrom animations
+    if let Ok(camera) = q_camera.get_single_mut() {
         commands
             .entity(camera)
             .insert(cam_animator_translate)
@@ -132,8 +154,8 @@ fn setup_intro_cutscene(
             // to animate it. It also contains the start and end values associated
             // with the animation ratios 0. and 1.
             TransformPositionLens {
-                start: Vec3::new(-10., FLOOR_0 + 0.8, 10.),
-                end: Vec3::new(0., FLOOR_0 + 0.8, 10.),
+                start: Vec3::new(-10., FLOOR_0 + PLAYER_RADIUS, 10.),
+                end: Vec3::new(0., FLOOR_0 + PLAYER_RADIUS, 10.),
             },
         )))
         .with_children(|cb| {
@@ -171,7 +193,7 @@ fn setup_intro_cutscene(
     // enemy
     commands
         .spawn(SpatialBundle {
-            transform: Transform::from_xyz(10., FLOOR_0 + 0.8, 10.),
+            transform: Transform::from_xyz(10., FLOOR_0 + PLAYER_RADIUS, 10.),
             ..default()
         })
         .insert(IntroCutsceneTag)
@@ -210,7 +232,7 @@ fn setup_intro_cutscene(
     // enemy 2
     commands
         .spawn(SpatialBundle {
-            transform: Transform::from_xyz(25., FLOOR_0 + 0.8, 10.),
+            transform: Transform::from_xyz(25., FLOOR_0 + PLAYER_RADIUS, 10.),
             ..default()
         })
         .insert(IntroCutsceneTag)
@@ -298,16 +320,10 @@ fn setup_intro_cutscene(
         .insert(IntroCutsceneTag);
 }
 
-fn check_cutscene_over(
-    mut commands: Commands,
-    mut q_timer: Query<&mut ActiveCutsceneTimer>,
-    time: Res<Time>,
-) {
-    if let Ok(mut timer) = q_timer.get_single_mut() {
-        if timer.0.finished() {
+fn check_cutscene_over(mut commands: Commands, mut q_ev: EventReader<TweenCompleted>) {
+    for ev in q_ev.iter() {
+        if ev.user_data == 0 {
             commands.insert_resource(NextState(GameState::InGame));
-        } else {
-            timer.0.tick(time.delta());
         }
     }
 }
