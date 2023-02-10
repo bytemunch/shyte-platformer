@@ -69,9 +69,9 @@ struct PlayerFaceTag;
 #[derive(Component)]
 struct EnemyFaceTag;
 
-pub struct CutscenePlugin;
+pub struct IntroCutscenePlugin;
 
-impl Plugin for CutscenePlugin {
+impl Plugin for IntroCutscenePlugin {
     fn build(&self, app: &mut App) {
         app.add_loopless_state(IntroCutsceneProgress::Start)
             .add_system(component_animator_system::<OrthographicProjection>)
