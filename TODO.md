@@ -6,9 +6,19 @@ BUG: player sticks to ceilings
 
 BUG: enemies don't bounce off eachother
 
+BUG: font spills over button graphic for resume
+
 ## TODOS
 
-TODO: multiple ending cutscenes based on respect meter
+TODO: ending cutscenes based on respect meter
+
+TODO: move respect meter
+
+TODO: genocide cutscene: meet mr fuqheed, jump on him
+
+TODO: pacifist cutscene: meet mr fuqheed, calm down, sympathise
+
+TODO: regular cutscene: meet mr fuqheed, laugh at him (turn into enemy), get jumped on
 
 ## NOTES
 
@@ -50,15 +60,10 @@ CREEP: 9-Patch box drawing
 
 `it don't have to be perfect just ship SOMETHING for ONCE jeeeeeeeeeeez`
 
-REFAC: font as resource
+REFAC: font as resource / default font
 
 REFAC: cutscene / dialogue system w/ world-screen transform for speech
 
-REFAC: bundled entity child bundles, for childbuilder.spawn(ChildBundle::default())
-    like enemy/player child spritebundle bundle
-
 REFAC: kinematic physics ordering/labelling
-
-REFAC: button clicking functions can be one function with some component matching?
 
 REFAC: level vec for platforms and enemies, iterate and spawn instead of writing out helper fns lmao
