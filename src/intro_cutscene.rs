@@ -4,14 +4,13 @@ use bevy::prelude::*;
 use bevy_tweening::{
     component_animator_system,
     lens::{SpriteColorLens, TextColorLens, TransformPositionLens},
-    Animator, Delay, EaseFunction, Lens, Tween, TweenCompleted,
+    Animator, Delay, EaseFunction, Tween, TweenCompleted,
 };
-use iyes_loopless::{
-    prelude::{AppLooplessStateExt, IntoConditionalSystem},
-    state::NextState,
-};
+use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::{
+    back_to_enum,
+    cutscene::OrthographicProjectionScaleLens,
     level::{create_box, FLOOR_0, FLOOR_0_BOTTOM, FLOOR_1},
     player::PLAYER_RADIUS,
     states::GameState,
@@ -19,32 +18,9 @@ use crate::{
     TextureHandles, CAMERA_SCALE,
 };
 
-// mad enum dings ty @Shepmaster https://stackoverflow.com/a/57578431
-macro_rules! back_to_enum {
-    ($(#[$meta:meta])* $vis:vis enum $name:ident {
-        $($(#[$vmeta:meta])* $vname:ident $(= $val:expr)?,)*
-    }) => {
-        $(#[$meta])*
-        $vis enum $name {
-            $($(#[$vmeta])* $vname $(= $val)?,)*
-        }
-
-        impl std::convert::TryFrom<u64> for $name {
-            type Error = ();
-
-            fn try_from(v: u64) -> Result<Self, Self::Error> {
-                match v {
-                    $(x if x == $name::$vname as u64 => Ok($name::$vname),)*
-                    _ => Err(()),
-                }
-            }
-        }
-    }
-}
-
 back_to_enum! {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-    enum IntroCutsceneProgress {
+    pub enum IntroCutsceneProgress {
         Start = 0,
         CameraZoomIn, // fires after initial zoom in
         SpeechLine1,
@@ -73,9 +49,7 @@ pub struct IntroCutscenePlugin;
 
 impl Plugin for IntroCutscenePlugin {
     fn build(&self, app: &mut App) {
-        app.add_loopless_state(IntroCutsceneProgress::Start)
-            .add_system(component_animator_system::<OrthographicProjection>)
-            .add_system(intro_cutscene_controller.run_in_state(GameState::IntroCutscene))
+        app.add_system(component_animator_system::<OrthographicProjection>)
             .add_enter_system(GameState::IntroCutscene, start)
             .add_enter_system(IntroCutsceneProgress::CameraZoomIn, camera_zoom_in)
             .add_enter_system(IntroCutsceneProgress::SpeechLine1, speech_line_1)
@@ -83,23 +57,6 @@ impl Plugin for IntroCutscenePlugin {
             .add_enter_system(IntroCutsceneProgress::ActorAnimation, actor_animation)
             .add_enter_system(IntroCutsceneProgress::CameraZoomOut, camera_zoom_out)
             .add_exit_system(GameState::IntroCutscene, despawn_intro_cutscene);
-    }
-}
-
-// camera zoom lens
-#[derive(Debug, Copy, Clone, PartialEq)]
-struct OrthographicProjectionScaleLens {
-    start: f32,
-    end: f32,
-}
-
-impl Lens<OrthographicProjection> for OrthographicProjectionScaleLens {
-    fn lerp(&mut self, target: &mut OrthographicProjection, ratio: f32) {
-        let start = self.start;
-        let end = self.end;
-        let value = start + (end - start) * ratio;
-
-        target.scale = value;
     }
 }
 
@@ -498,34 +455,6 @@ fn camera_zoom_out(mut commands: Commands, mut q_camera: Query<Entity, With<Came
             .entity(camera)
             .insert(Animator::new(translate))
             .insert(Animator::new(proj_scale));
-    }
-}
-
-fn intro_cutscene_controller(mut commands: Commands, mut q_ev: EventReader<TweenCompleted>) {
-    // todo cutscene controller macro
-    for ev in q_ev.iter() {
-        let i = ev.user_data;
-        match i.try_into() {
-            Ok(IntroCutsceneProgress::Start) => {
-                commands.insert_resource(NextState(IntroCutsceneProgress::CameraZoomIn))
-            }
-            Ok(IntroCutsceneProgress::CameraZoomIn) => {
-                commands.insert_resource(NextState(IntroCutsceneProgress::SpeechLine1))
-            }
-            Ok(IntroCutsceneProgress::SpeechLine1) => {
-                commands.insert_resource(NextState(IntroCutsceneProgress::SpeechLine2))
-            }
-            Ok(IntroCutsceneProgress::SpeechLine2) => {
-                commands.insert_resource(NextState(IntroCutsceneProgress::ActorAnimation))
-            }
-            Ok(IntroCutsceneProgress::ActorAnimation) => {
-                commands.insert_resource(NextState(IntroCutsceneProgress::CameraZoomOut))
-            }
-            Ok(IntroCutsceneProgress::CameraZoomOut) => {
-                commands.insert_resource(NextState(GameState::InGame))
-            }
-            Err(_) => println!("error"),
-        }
     }
 }
 
