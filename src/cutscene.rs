@@ -195,7 +195,7 @@ fn start(
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_body.clone().unwrap(),
                 sprite: Sprite {
-                    color: Color::GREEN, // todo: const enum of enemy colors
+                    color: Color::GREEN, // todo: pub enum of enemy colors
                     custom_size: sprite_size,
                     ..default()
                 },
@@ -235,7 +235,7 @@ fn start(
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_body.clone().unwrap(),
                 sprite: Sprite {
-                    color: Color::BLUE, // todo: const enum of enemy colors
+                    color: Color::BLUE,
                     custom_size: sprite_size,
                     ..default()
                 },
@@ -358,14 +358,25 @@ fn speech_line_1(mut commands: Commands, asset_server: Res<AssetServer>) {
     let speech_seq = speech_in.then(speech_hold).then(speech_out);
     // add tween with end event
     commands
-        .spawn(TextBundle::from_section(
-            "hello im mr shyte",
-            TextStyle {
-                font: asset_server.load("fonts/Chalk-Regular.ttf"),
-                font_size: 40.0,
-                color: Color::rgba(0.9, 0.9, 0.9, 0.),
-            },
-        ))
+        .spawn(
+            (TextBundle::from_section(
+                "hello im mr shyte",
+                TextStyle {
+                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font_size: 40.0,
+                    color: Color::rgba(0.9, 0.9, 0.9, 0.),
+                },
+            ))
+            .with_style(Style {
+                position_type: PositionType::Absolute,
+                position: UiRect {
+                    top: Val::Px(400.),
+                    left: Val::Px(300.),
+                    ..default()
+                },
+                ..default()
+            }),
+        )
         .insert(Animator::new(speech_seq));
 }
 
@@ -403,14 +414,25 @@ fn speech_line_2(
     let speech_seq = speech_in.then(speech_hold).then(speech_out);
     // add tween with end event
     commands
-        .spawn(TextBundle::from_section(
-            "loll dumb name",
-            TextStyle {
-                font: asset_server.load("fonts/Chalk-Regular.ttf"),
-                font_size: 40.0,
-                color: Color::rgba(0.9, 0.9, 0.9, 0.),
-            },
-        ))
+        .spawn(
+            (TextBundle::from_section(
+                "lolll dumb name xd",
+                TextStyle {
+                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font_size: 40.0,
+                    color: Color::rgba(0.9, 0.9, 0.9, 0.),
+                },
+            ))
+            .with_style(Style {
+                position_type: PositionType::Absolute,
+                position: UiRect {
+                    top: Val::Px(420.),
+                    left: Val::Px(700.),
+                    ..default()
+                },
+                ..default()
+            }),
+        )
         .insert(Animator::new(speech_seq));
 
     // change enemy expression
