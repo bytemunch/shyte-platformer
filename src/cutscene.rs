@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_tweening::{
     component_animator_system,
-    lens::{TextColorLens, TransformPositionLens},
+    lens::{SpriteColorLens, TextColorLens, TransformPositionLens},
     Animator, Delay, EaseFunction, Lens, Tween, TweenCompleted,
 };
 use iyes_loopless::{
@@ -56,6 +56,18 @@ back_to_enum! {
 
 #[derive(Component)]
 struct IntroCutsceneTag;
+
+#[derive(Component)]
+struct PlayerTag;
+
+#[derive(Component)]
+struct PlayerBodyTag;
+
+#[derive(Component)]
+struct PlayerFaceTag;
+
+#[derive(Component)]
+struct EnemyFaceTag;
 
 pub struct CutscenePlugin;
 
@@ -112,6 +124,7 @@ fn start(
     let player = commands
         .spawn(SpatialBundle { ..default() })
         .insert(IntroCutsceneTag)
+        .insert(PlayerTag)
         .insert(Animator::new(Tween::new(
             // Use a quadratic easing on both endpoints.
             EaseFunction::QuadraticInOut,
@@ -145,7 +158,8 @@ fn start(
                     ..default()
                 },
                 ..default()
-            });
+            })
+            .insert(PlayerBodyTag);
 
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_face_neutral.clone().unwrap(),
@@ -155,7 +169,8 @@ fn start(
                     ..default()
                 },
                 ..default()
-            });
+            })
+            .insert(PlayerFaceTag);
         })
         .id();
 
@@ -195,7 +210,8 @@ fn start(
                     ..default()
                 },
                 ..default()
-            });
+            })
+            .insert(EnemyFaceTag);
         });
 
     // enemy 2
@@ -353,7 +369,13 @@ fn speech_line_1(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(Animator::new(speech_seq));
 }
 
-fn speech_line_2(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn speech_line_2(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    texture_handles: Res<TextureHandles>,
+
+    mut q_enemy_face: Query<&mut Handle<Image>, With<EnemyFaceTag>>,
+) {
     //todo dry
     let speech_in = Tween::new(
         EaseFunction::QuadraticOut,
@@ -390,17 +412,43 @@ fn speech_line_2(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
         ))
         .insert(Animator::new(speech_seq));
+
+    // change enemy expression
+    for mut h in q_enemy_face.iter_mut() {
+        *h = texture_handles.char_face_laughing.clone().unwrap();
+    }
+
+    // todo laugh particles
 }
 
-fn actor_animation(mut ev_w: EventWriter<TweenCompleted>, mut commands: Commands) {
-    //todo
+fn actor_animation(
+    mut q_player_face: Query<&mut Handle<Image>, With<PlayerFaceTag>>,
+    mut q_player_body: Query<Entity, With<PlayerBodyTag>>,
+    texture_handles: Res<TextureHandles>,
+    mut commands: Commands,
+) {
+    let yellow_to_red = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(0.3),
+        SpriteColorLens {
+            start: Color::YELLOW,
+            end: Color::RED,
+        },
+    )
+    .with_completed_event(IntroCutsceneProgress::ActorAnimation as u64);
 
-    let x = commands.spawn(IntroCutsceneTag);
+    if let Ok(player_body) = q_player_body.get_single_mut() {
+        commands
+            .entity(player_body)
+            .insert(Animator::new(yellow_to_red));
+    }
 
-    ev_w.send(TweenCompleted {
-        entity: x.id(),
-        user_data: IntroCutsceneProgress::ActorAnimation as u64,
-    })
+    // make player face angry
+    for mut h in q_player_face.iter_mut() {
+        *h = texture_handles.char_face_angry.clone().unwrap();
+    }
+
+    // todo player angry particles?
 }
 
 fn camera_zoom_out(mut commands: Commands, mut q_camera: Query<Entity, With<Camera2d>>) {

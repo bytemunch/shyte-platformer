@@ -10,8 +10,6 @@ BUG: enemies don't bounce off eachother
 
 TODO: intro, multiple ending cutscenes based on respect meter
 
-TODO: make ActorGraphics bundle / helper function for use with ChildBuilder.
-
 NOTE: Parent/Child hierarchies are logical. It just adds the appropriate Parent/Children components to each entity. 
     EG child gets the Parent component pointing to parent entity.
 
