@@ -3,14 +3,14 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_tweening::{
     component_animator_system,
-    lens::{SpriteColorLens, TextColorLens, TransformPositionLens},
-    Animator, Delay, EaseFunction, Tween, TweenCompleted,
+    lens::{SpriteColorLens, TransformPositionLens},
+    Animator, EaseFunction, Tween, TweenCompleted,
 };
 use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::{
     back_to_enum,
-    cutscene::OrthographicProjectionScaleLens,
+    cutscene::{dialogue_text, OrthographicProjectionScaleLens},
     level::{create_box, FLOOR_0, FLOOR_0_BOTTOM, FLOOR_1},
     player::PLAYER_RADIUS,
     states::GameState,
@@ -60,7 +60,6 @@ impl Plugin for IntroCutscenePlugin {
     }
 }
 
-const TALK_DELAY: f32 = 1.;
 const ZOOM_IN_TIME: f32 = 2.5;
 const ZOOM_OUT_TIME: f32 = 0.5;
 const ZOOM_Y_OFFSET: f32 = -5.;
@@ -289,52 +288,13 @@ fn camera_zoom_in(mut commands: Commands, mut q_camera: Query<Entity, With<Camer
 }
 
 fn speech_line_1(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let speech_in = Tween::new(
-        EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(0.3),
-        TextColorLens {
-            start: Color::NONE,
-            end: Color::WHITE,
-            section: 0,
-        },
-    );
-
-    let speech_hold: Delay<Text> = Delay::new(Duration::from_secs_f32(TALK_DELAY));
-
-    let speech_out = Tween::new(
-        EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(0.3),
-        TextColorLens {
-            end: Color::NONE,
-            start: Color::WHITE,
-            section: 0,
-        },
-    )
-    .with_completed_event(IntroCutsceneProgress::SpeechLine1 as u64);
-
-    let speech_seq = speech_in.then(speech_hold).then(speech_out);
-    // add tween with end event
-    commands
-        .spawn(
-            (TextBundle::from_section(
-                "hello im mr shyte",
-                TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
-                    font_size: 40.0,
-                    color: Color::rgba(0.9, 0.9, 0.9, 0.),
-                },
-            ))
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                position: UiRect {
-                    top: Val::Px(400.),
-                    left: Val::Px(300.),
-                    ..default()
-                },
-                ..default()
-            }),
-        )
-        .insert(Animator::new(speech_seq));
+    commands.spawn(dialogue_text(
+        "hello im mr shyte",
+        400.,
+        300.,
+        asset_server.load("fonts/Chalk-Regular.ttf"),
+        IntroCutsceneProgress::SpeechLine1 as u64,
+    ));
 }
 
 fn speech_line_2(
@@ -344,53 +304,13 @@ fn speech_line_2(
 
     mut q_enemy_face: Query<&mut Handle<Image>, With<EnemyFaceTag>>,
 ) {
-    //todo dry
-    let speech_in = Tween::new(
-        EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(0.3),
-        TextColorLens {
-            start: Color::NONE,
-            end: Color::WHITE,
-            section: 0,
-        },
-    );
-
-    let speech_hold: Delay<Text> = Delay::new(Duration::from_secs_f32(TALK_DELAY));
-
-    let speech_out = Tween::new(
-        EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(0.3),
-        TextColorLens {
-            end: Color::NONE,
-            start: Color::WHITE,
-            section: 0,
-        },
-    )
-    .with_completed_event(IntroCutsceneProgress::SpeechLine2 as u64);
-
-    let speech_seq = speech_in.then(speech_hold).then(speech_out);
-    // add tween with end event
-    commands
-        .spawn(
-            (TextBundle::from_section(
-                "lolll dumb name xd",
-                TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
-                    font_size: 40.0,
-                    color: Color::rgba(0.9, 0.9, 0.9, 0.),
-                },
-            ))
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                position: UiRect {
-                    top: Val::Px(420.),
-                    left: Val::Px(700.),
-                    ..default()
-                },
-                ..default()
-            }),
-        )
-        .insert(Animator::new(speech_seq));
+    commands.spawn(dialogue_text(
+        "loll dumb name",
+        410.,
+        700.,
+        asset_server.load("fonts/Chalk-Regular.ttf"),
+        IntroCutsceneProgress::SpeechLine2 as u64,
+    ));
 
     // change enemy expression
     for mut h in q_enemy_face.iter_mut() {

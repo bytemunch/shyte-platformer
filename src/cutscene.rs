@@ -1,5 +1,9 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
-use bevy_tweening::{TweenCompleted, Lens};
+use bevy_tweening::{
+    lens::TextColorLens, Animator, Delay, EaseFunction, Lens, Tween, TweenCompleted,
+};
 use iyes_loopless::{
     prelude::{AppLooplessStateExt, IntoConditionalSystem},
     state::NextState,
@@ -63,6 +67,66 @@ impl Lens<OrthographicProjection> for OrthographicProjectionScaleLens {
 
         target.scale = value;
     }
+}
+
+// tweens
+
+// consts
+const TALK_DELAY: f32 = 0.7;
+
+// todo there's gonna be a better way of doing this, i know it
+pub fn dialogue_text(
+    value: impl Into<String>,
+    top: f32,
+    left: f32,
+    font: Handle<Font>,
+    user_data: u64,
+) -> (TextBundle, Animator<Text>) {
+    let speech_in = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(0.3),
+        TextColorLens {
+            start: Color::NONE,
+            end: Color::WHITE,
+            section: 0,
+        },
+    );
+
+    let speech_hold: Delay<Text> = Delay::new(Duration::from_secs_f32(TALK_DELAY));
+
+    let speech_out = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(0.3),
+        TextColorLens {
+            end: Color::NONE,
+            start: Color::WHITE,
+            section: 0,
+        },
+    )
+    .with_completed_event(user_data);
+
+    let speech_seq = speech_in.then(speech_hold).then(speech_out);
+
+    (
+        (TextBundle::from_section(
+            value,
+            TextStyle {
+                font,
+                font_size: 40.0,
+                color: Color::rgba(0.9, 0.9, 0.9, 0.),
+            },
+        ))
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                top: Val::Px(top),
+                left: Val::Px(left),
+                ..default()
+            },
+            ..default()
+        }),
+        Animator::new(speech_seq),
+    )
 }
 
 // mad enum dings ty @Shepmaster https://stackoverflow.com/a/57578431
