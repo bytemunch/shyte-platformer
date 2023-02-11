@@ -9,6 +9,7 @@ use iyes_loopless::{
 
 use crate::{
     kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity},
+    level::Trigger,
     states::{GameState, PauseState},
     Actor, InGameItem, SystemOrderLabel, TextureHandles,
 };
@@ -35,6 +36,12 @@ impl Plugin for PlayerPlugin {
                 .label(SystemOrderLabel::Input),
         )
         .add_system(
+            detect_triggers
+                .run_in_state(GameState::InGame)
+                .run_in_state(PauseState::Running)
+                .label(SystemOrderLabel::Collisions),
+        )
+        .add_system(
             detect_player_removed
                 .run_in_state(GameState::InGame)
                 .run_in_state(PauseState::Running),
@@ -45,6 +52,20 @@ impl Plugin for PlayerPlugin {
 fn detect_player_removed(mut commands: Commands, removals: RemovedComponents<Player>) {
     for _entity in removals.iter() {
         commands.insert_resource(NextState(GameState::Dead));
+    }
+}
+
+fn detect_triggers(
+    rapier_context: Res<RapierContext>,
+    q_player: Query<Entity, With<Player>>,
+    q_triggers: Query<Entity, With<Trigger>>,
+) {
+    if let Ok(player) = q_player.get_single() {
+        for trigger in q_triggers.iter() {
+            if rapier_context.intersection_pair(player, trigger) == Some(true) {
+                println!("PLAYER HIT TRIGGER {:?}", trigger);
+            }
+        }
     }
 }
 
@@ -64,12 +85,14 @@ pub fn spawn_player(commands: &mut Commands, texture_handles: &TextureHandles, p
         .spawn((
             RigidBody::KinematicPositionBased,
             ActiveHooks::FILTER_CONTACT_PAIRS,
+            ActiveCollisionTypes::KINEMATIC_STATIC
         ))
         .insert(Collider::ball(PLAYER_RADIUS))
         .insert(KinematicCharacterController {
             apply_impulse_to_dynamic_bodies: true,
             translation: Some(Vec2::ZERO),
             filter_groups: Some(CollisionGroups::new(Group::GROUP_2, Group::GROUP_2)),
+            filter_flags: QueryFilterFlags::EXCLUDE_SENSORS,
             ..default()
         })
         .insert(CCAcceleration(Vec2::new(0., 0.)))

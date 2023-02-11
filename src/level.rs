@@ -30,6 +30,9 @@ impl Plugin for LevelPlugin {
 }
 
 #[derive(Component)]
+pub struct Trigger;
+
+#[derive(Component)]
 pub struct Wall;
 
 #[derive(Component)]
@@ -299,6 +302,15 @@ fn setup_level(
         &texture_handles,
         Vec3::new(0., FLOOR_0 + 0.8, 10.),
     );
+
+    commands
+        .spawn(Collider::ball(10.))
+        .insert(Sensor)
+        .insert(Trigger)
+        .insert(InGameItem)
+        .insert(TransformBundle::from_transform(Transform::from_xyz(
+            10., FLOOR_0, 10.,
+        )));
 
     // first static enemy
     spawn_enemy(
