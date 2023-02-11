@@ -18,7 +18,7 @@ TODO: genocide cutscene: meet mr fuqheed, jump on him
 
 TODO: pacifist cutscene: meet mr fuqheed, calm down, sympathise
 
-TODO: regular cutscene: meet mr fuqheed, laugh at him (turn into enemy), get jumped on
+TODO: regular cutscene: get jumped on
 
 ## NOTES
 
@@ -32,6 +32,10 @@ NOTE: Adding multiple of the same component overwrites previous component.
 ## LATER
 
 TODO: animate chalk
+
+TODO: tween player to end cutscene position
+
+TODO: cinematic bars
 
 ## SCOPE CREEP
 

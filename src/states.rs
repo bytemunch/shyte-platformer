@@ -8,6 +8,9 @@ pub enum GameState {
     LevelEditor,
     Dead,
     IntroCutscene,// TODO cutscene sub state
+    NormalEndingCutscene,
+    PacifistEndingCutscene,
+    GenocideEndingCutscene,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

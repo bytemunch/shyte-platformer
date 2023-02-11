@@ -10,6 +10,7 @@ mod states;
 mod util;
 mod cutscene;
 mod intro_cutscene;
+mod normal_ending_cutscene;
 
 use background::BackgroundPlugin;
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
@@ -28,6 +29,7 @@ use interfaces::UserInterfacesPlugin;
 use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
 use level_editor::LevelEditorPlugin;
+use normal_ending_cutscene::NormalEndingCutscenePlugin;
 use pause::PausePlugin;
 use player::PlayerPlugin;
 use states::StatesPlugin;
@@ -90,6 +92,7 @@ fn main() {
         .add_plugin(LevelEditorPlugin)
         .add_plugin(CutscenePlugin)
         .add_plugin(IntroCutscenePlugin)
+        .add_plugin(NormalEndingCutscenePlugin)
         // bevy_tween
         .add_plugin(TweeningPlugin)
         // particles

@@ -59,11 +59,12 @@ fn detect_triggers(
     rapier_context: Res<RapierContext>,
     q_player: Query<Entity, With<Player>>,
     q_triggers: Query<Entity, With<Trigger>>,
+    mut commands: Commands,
 ) {
     if let Ok(player) = q_player.get_single() {
         for trigger in q_triggers.iter() {
             if rapier_context.intersection_pair(player, trigger) == Some(true) {
-                println!("PLAYER HIT TRIGGER {:?}", trigger);
+                commands.insert_resource(NextState(GameState::NormalEndingCutscene));
             }
         }
     }
@@ -85,7 +86,7 @@ pub fn spawn_player(commands: &mut Commands, texture_handles: &TextureHandles, p
         .spawn((
             RigidBody::KinematicPositionBased,
             ActiveHooks::FILTER_CONTACT_PAIRS,
-            ActiveCollisionTypes::KINEMATIC_STATIC
+            ActiveCollisionTypes::KINEMATIC_STATIC,
         ))
         .insert(Collider::ball(PLAYER_RADIUS))
         .insert(KinematicCharacterController {

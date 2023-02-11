@@ -300,17 +300,9 @@ fn setup_level(
     spawn_player(
         &mut commands,
         &texture_handles,
+        // Vec3::new(174., FLOOR_0 + 14.8, 10.), // end testing
         Vec3::new(0., FLOOR_0 + 0.8, 10.),
     );
-
-    commands
-        .spawn(Collider::ball(10.))
-        .insert(Sensor)
-        .insert(Trigger)
-        .insert(InGameItem)
-        .insert(TransformBundle::from_transform(Transform::from_xyz(
-            10., FLOOR_0, 10.,
-        )));
 
     // first static enemy
     spawn_enemy(
@@ -559,11 +551,23 @@ fn setup_level(
     create_box(
         &mut commands,
         Vec2::new(188., FLOOR_0),
-        Vec2::new(220., FLOOR_0_BOTTOM),
+        Vec2::new(300., FLOOR_0_BOTTOM),
         &texture_handles,
         &mut meshes,
         &mut materials,
     );
+
+    // ending cutscene trigger
+    commands
+        .spawn(Collider::cuboid(16., 1.))
+        .insert(Sensor)
+        .insert(Trigger)
+        .insert(InGameItem)
+        .insert(TransformBundle::from_transform(Transform::from_xyz(
+            204.,
+            FLOOR_0 - 0.5,
+            10.,
+        )));
 }
 
 fn despawn_level(commands: Commands, query: Query<Entity, With<InGameItem>>) {

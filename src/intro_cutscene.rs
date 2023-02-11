@@ -2,11 +2,10 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy_tweening::{
-    component_animator_system,
     lens::{SpriteColorLens, TransformPositionLens},
     Animator, EaseFunction, Tween, TweenCompleted,
 };
-use iyes_loopless::prelude::AppLooplessStateExt;
+use iyes_loopless::{prelude::{AppLooplessStateExt, IntoConditionalSystem}, state::NextState};
 
 use crate::{
     back_to_enum,
@@ -49,14 +48,44 @@ pub struct IntroCutscenePlugin;
 
 impl Plugin for IntroCutscenePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(component_animator_system::<OrthographicProjection>)
-            .add_enter_system(GameState::IntroCutscene, start)
+        app.add_enter_system(GameState::IntroCutscene, start)
             .add_enter_system(IntroCutsceneProgress::CameraZoomIn, camera_zoom_in)
             .add_enter_system(IntroCutsceneProgress::SpeechLine1, speech_line_1)
             .add_enter_system(IntroCutsceneProgress::SpeechLine2, speech_line_2)
             .add_enter_system(IntroCutsceneProgress::ActorAnimation, actor_animation)
             .add_enter_system(IntroCutsceneProgress::CameraZoomOut, camera_zoom_out)
-            .add_exit_system(GameState::IntroCutscene, despawn_intro_cutscene);
+            .add_exit_system(GameState::IntroCutscene, despawn_intro_cutscene)
+            .add_system(cutscene_controller.run_in_state(GameState::IntroCutscene));
+    }
+}
+
+fn cutscene_controller(mut commands: Commands, mut q_ev: EventReader<TweenCompleted>) {
+    // master cutscene controller
+    // todo this is gonna get messy, find a nice way of splitting it up?
+    for ev in q_ev.iter() {
+        let i = ev.user_data;
+        match i.try_into() {
+            // intro
+            Ok(IntroCutsceneProgress::Start) => {
+                commands.insert_resource(NextState(IntroCutsceneProgress::CameraZoomIn))
+            }
+            Ok(IntroCutsceneProgress::CameraZoomIn) => {
+                commands.insert_resource(NextState(IntroCutsceneProgress::SpeechLine1))
+            }
+            Ok(IntroCutsceneProgress::SpeechLine1) => {
+                commands.insert_resource(NextState(IntroCutsceneProgress::SpeechLine2))
+            }
+            Ok(IntroCutsceneProgress::SpeechLine2) => {
+                commands.insert_resource(NextState(IntroCutsceneProgress::ActorAnimation))
+            }
+            Ok(IntroCutsceneProgress::ActorAnimation) => {
+                commands.insert_resource(NextState(IntroCutsceneProgress::CameraZoomOut))
+            }
+            Ok(IntroCutsceneProgress::CameraZoomOut) => {
+                commands.insert_resource(NextState(GameState::InGame))
+            }
+            Err(_) => println!("error"),
+        }
     }
 }
 
