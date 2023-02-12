@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_tweening::{
     lens::{SpriteColorLens, TransformPositionLens},
-    Animator, EaseFunction, Tween, TweenCompleted,
+    Animator, EaseFunction, EaseMethod, Sequence, Tracks, Tween, TweenCompleted,
 };
 use iyes_loopless::{
     prelude::{AppLooplessStateExt, IntoConditionalSystem},
@@ -12,7 +12,10 @@ use iyes_loopless::{
 
 use crate::{
     back_to_enum,
-    cutscene::{dialogue_text, OrthographicProjectionScaleLens},
+    cutscene::{
+        dialogue_text, OrthographicProjectionScaleLens, TransformTranslationXLens,
+        TransformTranslationYLens,
+    },
     level::{create_box, FLOOR_0, FLOOR_0_BOTTOM},
     player::PLAYER_RADIUS,
     states::GameState,
@@ -28,6 +31,8 @@ back_to_enum! {
         SpeechLine1,
         SpeechLine2,
         ActorAnimation,
+        FuqheedJump,
+        RemovePlayer,
         CameraZoomOut,
     }
 }
@@ -43,6 +48,9 @@ struct PlayerBodyTag;
 
 #[derive(Component)]
 struct PlayerFaceTag;
+
+#[derive(Component)]
+struct FuqheedTag;
 
 #[derive(Component)]
 struct FuqheedFaceTag;
@@ -62,6 +70,8 @@ impl Plugin for NormalEndingCutscenePlugin {
                 NormalEndingCutsceneProgress::ActorAnimation,
                 actor_animation,
             )
+            .add_enter_system(NormalEndingCutsceneProgress::FuqheedJump, fuqheed_jump)
+            .add_enter_system(NormalEndingCutsceneProgress::RemovePlayer, remove_player)
             .add_enter_system(NormalEndingCutsceneProgress::CameraZoomOut, camera_zoom_out)
             .add_exit_system(GameState::NormalEndingCutscene, despawn_intro_cutscene)
             .add_system(cutscene_controller.run_in_state(GameState::NormalEndingCutscene));
@@ -87,6 +97,12 @@ fn cutscene_controller(mut commands: Commands, mut q_ev: EventReader<TweenComple
                 commands.insert_resource(NextState(NormalEndingCutsceneProgress::ActorAnimation))
             }
             Ok(NormalEndingCutsceneProgress::ActorAnimation) => {
+                commands.insert_resource(NextState(NormalEndingCutsceneProgress::FuqheedJump))
+            }
+            Ok(NormalEndingCutsceneProgress::FuqheedJump) => {
+                commands.insert_resource(NextState(NormalEndingCutsceneProgress::RemovePlayer))
+            }
+            Ok(NormalEndingCutsceneProgress::RemovePlayer) => {
                 commands.insert_resource(NextState(NormalEndingCutsceneProgress::CameraZoomOut))
             }
             Ok(NormalEndingCutsceneProgress::CameraZoomOut) => {
@@ -175,6 +191,7 @@ fn start(
                 end: Vec3::new(205., FLOOR_0 + PLAYER_RADIUS, 10.),
             },
         )))
+        .insert(FuqheedTag)
         .insert(NormalEndingCutsceneTag)
         .with_children(|cb| {
             cb.spawn(SpriteBundle {
@@ -337,6 +354,80 @@ fn actor_animation(
     // todo angry particles?
 
     // todo jump animation
+}
+
+const JUMP_APEX: f32 = 2.3;
+
+fn fuqheed_jump(mut commands: Commands, mut q_fuqheed: Query<Entity, With<FuqheedTag>>) {
+    let right_to_left = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(0.6),
+        TransformTranslationXLens {
+            start: 205.,
+            end: 195.,
+        },
+    );
+
+    let jump_up = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(0.3),
+        TransformTranslationYLens {
+            start: FLOOR_0 + PLAYER_RADIUS,
+            end: JUMP_APEX,
+        },
+    );
+
+    let jump_down = Tween::new(
+        EaseMethod::Linear,
+        Duration::from_secs_f32(0.3),
+        TransformTranslationYLens {
+            start: JUMP_APEX,
+            end: FLOOR_0 + PLAYER_RADIUS * 2.,
+        },
+    )
+    .with_completed_event(NormalEndingCutsceneProgress::FuqheedJump as u64);
+
+    let bounce_up = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(0.1),
+        TransformTranslationYLens {
+            start: FLOOR_0 + PLAYER_RADIUS * 2.,
+            end: FLOOR_0 + PLAYER_RADIUS * 4.,
+        },
+    );
+
+    let bounce_down = Tween::new(
+        EaseMethod::Linear,
+        Duration::from_secs_f32(0.15),
+        TransformTranslationYLens {
+            start: FLOOR_0 + PLAYER_RADIUS * 4.,
+            end: FLOOR_0 + PLAYER_RADIUS,
+        },
+    );
+
+    let x_seq = Sequence::new([right_to_left]);
+    let y_seq = jump_up.then(jump_down).then(bounce_up).then(bounce_down);
+
+    let tracks = Tracks::new([x_seq, y_seq]);
+
+    if let Ok(fuqheed) = q_fuqheed.get_single_mut() {
+        commands.entity(fuqheed).insert(Animator::new(tracks));
+    }
+}
+
+fn remove_player(
+    mut commands: Commands,
+    q_player: Query<Entity, With<PlayerTag>>,
+    mut ev_w: EventWriter<TweenCompleted>,
+) {
+    if let Ok(player) = q_player.get_single() {
+        commands.entity(player).despawn_recursive();
+    }
+
+    ev_w.send(TweenCompleted {
+        entity: commands.spawn(NormalEndingCutsceneTag).id(),
+        user_data: NormalEndingCutsceneProgress::RemovePlayer as u64,
+    })
 }
 
 fn camera_zoom_out(mut commands: Commands, mut q_camera: Query<Entity, With<Camera2d>>) {

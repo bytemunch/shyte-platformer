@@ -40,6 +40,39 @@ impl Lens<OrthographicProjection> for OrthographicProjectionScaleLens {
     }
 }
 
+// translate x
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct TransformTranslationXLens {
+    pub start: f32,
+    pub end: f32,
+}
+
+impl Lens<Transform> for TransformTranslationXLens {
+    fn lerp(&mut self, target: &mut Transform, ratio: f32) {
+        let start = self.start;
+        let end = self.end;
+        let value = start + (end - start) * ratio;
+
+        target.translation.x = value;
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct TransformTranslationYLens {
+    pub start: f32,
+    pub end: f32,
+}
+
+impl Lens<Transform> for TransformTranslationYLens {
+    fn lerp(&mut self, target: &mut Transform, ratio: f32) {
+        let start = self.start;
+        let end = self.end;
+        let value = start + (end - start) * ratio;
+
+        target.translation.y = value;
+    }
+}
+
 // tweens
 
 // consts

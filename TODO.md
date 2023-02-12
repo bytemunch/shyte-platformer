@@ -18,7 +18,9 @@ TODO: genocide cutscene: meet mr fuqheed, jump on him
 
 TODO: pacifist cutscene: meet mr fuqheed, calm down, sympathise
 
-TODO: regular cutscene: get jumped on
+TODO: ending cutscene fadeout
+
+TODO: win screen
 
 ## NOTES
 
