@@ -25,7 +25,7 @@ use crate::{
 
 back_to_enum! {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-    pub enum NormalEndingCutsceneProgress {
+    pub enum NormalEndingProgress {
         Start = 0,
         CameraZoomIn,
         SpeechLine1,
@@ -38,7 +38,7 @@ back_to_enum! {
 }
 
 #[derive(Component)]
-pub struct NormalEndingCutsceneTag;
+pub struct NormalEndingTag;
 
 #[derive(Component)]
 struct PlayerTag;
@@ -58,53 +58,51 @@ struct FuqheedFaceTag;
 #[derive(Component)]
 struct FuqheedBodyTag;
 
-pub struct NormalEndingCutscenePlugin;
+pub struct NormalEndingPlugin;
 
-impl Plugin for NormalEndingCutscenePlugin {
+impl Plugin for NormalEndingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::NormalEndingCutscene, start)
-            .add_enter_system(NormalEndingCutsceneProgress::CameraZoomIn, camera_zoom_in)
-            .add_enter_system(NormalEndingCutsceneProgress::SpeechLine1, speech_line_1)
-            .add_enter_system(NormalEndingCutsceneProgress::SpeechLine2, speech_line_2)
+        app.add_enter_system(GameState::NormalEnding, start)
+            .add_enter_system(NormalEndingProgress::CameraZoomIn, camera_zoom_in)
+            .add_enter_system(NormalEndingProgress::SpeechLine1, speech_line_1)
+            .add_enter_system(NormalEndingProgress::SpeechLine2, speech_line_2)
             .add_enter_system(
-                NormalEndingCutsceneProgress::ActorAnimation,
+                NormalEndingProgress::ActorAnimation,
                 actor_animation,
             )
-            .add_enter_system(NormalEndingCutsceneProgress::FuqheedJump, fuqheed_jump)
-            .add_enter_system(NormalEndingCutsceneProgress::RemovePlayer, remove_player)
-            .add_enter_system(NormalEndingCutsceneProgress::CameraZoomOut, camera_zoom_out)
-            .add_system(cutscene_controller.run_in_state(GameState::NormalEndingCutscene));
+            .add_enter_system(NormalEndingProgress::FuqheedJump, fuqheed_jump)
+            .add_enter_system(NormalEndingProgress::RemovePlayer, remove_player)
+            .add_enter_system(NormalEndingProgress::CameraZoomOut, camera_zoom_out)
+            .add_system(cutscene_controller.run_in_state(GameState::NormalEnding));
     }
 }
 
 fn cutscene_controller(mut commands: Commands, mut q_ev: EventReader<TweenCompleted>) {
-    // master cutscene controller
-    // todo this is gonna get messy, find a nice way of splitting it up?
     for ev in q_ev.iter() {
         let i = ev.user_data;
         match i.try_into() {
-            Ok(NormalEndingCutsceneProgress::Start) => {
-                commands.insert_resource(NextState(NormalEndingCutsceneProgress::CameraZoomIn))
+            Ok(NormalEndingProgress::Start) => {
+                commands.insert_resource(NextState(NormalEndingProgress::CameraZoomIn))
             }
-            Ok(NormalEndingCutsceneProgress::CameraZoomIn) => {
-                commands.insert_resource(NextState(NormalEndingCutsceneProgress::SpeechLine1))
+            Ok(NormalEndingProgress::CameraZoomIn) => {
+                commands.insert_resource(NextState(NormalEndingProgress::SpeechLine1))
             }
-            Ok(NormalEndingCutsceneProgress::SpeechLine1) => {
-                commands.insert_resource(NextState(NormalEndingCutsceneProgress::SpeechLine2))
+            Ok(NormalEndingProgress::SpeechLine1) => {
+                commands.insert_resource(NextState(NormalEndingProgress::SpeechLine2))
             }
-            Ok(NormalEndingCutsceneProgress::SpeechLine2) => {
-                commands.insert_resource(NextState(NormalEndingCutsceneProgress::ActorAnimation))
+            Ok(NormalEndingProgress::SpeechLine2) => {
+                commands.insert_resource(NextState(NormalEndingProgress::ActorAnimation))
             }
-            Ok(NormalEndingCutsceneProgress::ActorAnimation) => {
-                commands.insert_resource(NextState(NormalEndingCutsceneProgress::FuqheedJump))
+            Ok(NormalEndingProgress::ActorAnimation) => {
+                commands.insert_resource(NextState(NormalEndingProgress::FuqheedJump))
             }
-            Ok(NormalEndingCutsceneProgress::FuqheedJump) => {
-                commands.insert_resource(NextState(NormalEndingCutsceneProgress::RemovePlayer))
+            Ok(NormalEndingProgress::FuqheedJump) => {
+                commands.insert_resource(NextState(NormalEndingProgress::RemovePlayer))
             }
-            Ok(NormalEndingCutsceneProgress::RemovePlayer) => {
-                commands.insert_resource(NextState(NormalEndingCutsceneProgress::CameraZoomOut))
+            Ok(NormalEndingProgress::RemovePlayer) => {
+                commands.insert_resource(NextState(NormalEndingProgress::CameraZoomOut))
             }
-            Ok(NormalEndingCutsceneProgress::CameraZoomOut) => {
+            Ok(NormalEndingProgress::CameraZoomOut) => {
                 commands.insert_resource(NextState(GameState::EndScreen))
             }
             Err(_) => println!("error"),
@@ -139,7 +137,7 @@ fn start(
                 end: Vec3::new(195., FLOOR_0 + PLAYER_RADIUS, 10.),
             },
         )))
-        .insert(NormalEndingCutsceneTag)
+        .insert(NormalEndingTag)
         .insert(PlayerTag)
         .with_children(|cb| {
             cb.spawn(SpriteBundle {
@@ -191,7 +189,7 @@ fn start(
             },
         )))
         .insert(FuqheedTag)
-        .insert(NormalEndingCutsceneTag)
+        .insert(NormalEndingTag)
         .with_children(|cb| {
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_outline.clone().unwrap(),
@@ -236,11 +234,11 @@ fn start(
         &mut materials,
     );
 
-    commands.entity(b1).insert(NormalEndingCutsceneTag);
+    commands.entity(b1).insert(NormalEndingTag);
 
     ev_w.send(TweenCompleted {
         entity: player,
-        user_data: NormalEndingCutsceneProgress::Start as u64,
+        user_data: NormalEndingProgress::Start as u64,
     })
 }
 
@@ -265,7 +263,7 @@ fn camera_zoom_in(
                 end: Vec3::new(200., ZOOM_Y_OFFSET, 0.),
             },
         )
-        .with_completed_event(NormalEndingCutsceneProgress::CameraZoomIn as u64);
+        .with_completed_event(NormalEndingProgress::CameraZoomIn as u64);
 
         commands
             .entity(camera)
@@ -280,7 +278,7 @@ fn speech_line_1(mut commands: Commands, asset_server: Res<AssetServer>) {
         400.,
         700.,
         asset_server.load("fonts/Chalk-Regular.ttf"),
-        NormalEndingCutsceneProgress::SpeechLine1 as u64,
+        NormalEndingProgress::SpeechLine1 as u64,
     ));
 }
 
@@ -297,7 +295,7 @@ fn speech_line_2(
         410.,
         300.,
         asset_server.load("fonts/Chalk-Regular.ttf"),
-        NormalEndingCutsceneProgress::SpeechLine2 as u64,
+        NormalEndingProgress::SpeechLine2 as u64,
     ));
 
     // change player expression
@@ -337,7 +335,7 @@ fn actor_animation(
             end: Color::RED,
         },
     )
-    .with_completed_event(NormalEndingCutsceneProgress::ActorAnimation as u64);
+    .with_completed_event(NormalEndingProgress::ActorAnimation as u64);
 
     if let Ok(player_body) = q_fuqheed_body.get_single_mut() {
         commands
@@ -384,7 +382,7 @@ fn fuqheed_jump(mut commands: Commands, mut q_fuqheed: Query<Entity, With<Fuqhee
             end: FLOOR_0 + PLAYER_RADIUS * 2.,
         },
     )
-    .with_completed_event(NormalEndingCutsceneProgress::FuqheedJump as u64);
+    .with_completed_event(NormalEndingProgress::FuqheedJump as u64);
 
     let bounce_up = Tween::new(
         EaseFunction::QuadraticOut,
@@ -424,8 +422,8 @@ fn remove_player(
     }
 
     ev_w.send(TweenCompleted {
-        entity: commands.spawn(NormalEndingCutsceneTag).id(),
-        user_data: NormalEndingCutsceneProgress::RemovePlayer as u64,
+        entity: commands.spawn(NormalEndingTag).id(),
+        user_data: NormalEndingProgress::RemovePlayer as u64,
     })
 }
 
@@ -448,7 +446,7 @@ fn camera_zoom_out(mut commands: Commands, mut q_camera: Query<Entity, With<Came
     );
 
     let dummy_delay: Delay<Dummy> = Delay::new(Duration::from_secs_f32(0.3))
-        .with_completed_event(NormalEndingCutsceneProgress::CameraZoomOut as u64);
+        .with_completed_event(NormalEndingProgress::CameraZoomOut as u64);
 
     // set camera transfrom animations
     if let Ok(camera) = q_camera.get_single_mut() {
@@ -461,6 +459,6 @@ fn camera_zoom_out(mut commands: Commands, mut q_camera: Query<Entity, With<Came
     }
 }
 
-pub fn despawn_normal_ending(commands: Commands, q: Query<Entity, With<NormalEndingCutsceneTag>>) {
+pub fn despawn_normal_ending(commands: Commands, q: Query<Entity, With<NormalEndingTag>>) {
     despawn_with(commands, q)
 }

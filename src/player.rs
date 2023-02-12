@@ -65,7 +65,7 @@ fn detect_triggers(
         for trigger in q_triggers.iter() {
             if rapier_context.intersection_pair(player, trigger) == Some(true) {
                 commands.insert_resource(Ending(0));
-                commands.insert_resource(NextState(GameState::NormalEndingCutscene));
+                commands.insert_resource(NextState(GameState::NormalEnding));
             }
         }
     }

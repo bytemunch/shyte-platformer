@@ -8,9 +8,9 @@ pub enum GameState {
     LevelEditor,
     Dead,
     IntroCutscene, // TODO cutscene sub state
-    NormalEndingCutscene,
-    PacifistEndingCutscene,
-    GenocideEndingCutscene,
+    NormalEnding,
+    PacifistEnding,
+    GenocideEnding,
     EndScreen,
 }
 

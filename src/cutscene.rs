@@ -8,7 +8,7 @@ use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::{
     end_screen::EndScreenProgress, intro_cutscene::IntroCutsceneProgress,
-    normal_ending_cutscene::NormalEndingCutsceneProgress,
+    normal_ending::NormalEndingProgress,
 };
 
 #[derive(Component)]
@@ -24,7 +24,7 @@ impl Plugin for CutscenePlugin {
             .add_system(component_animator_system::<BackgroundColor>)
             .add_system(component_animator_system::<Dummy>)
             .add_loopless_state(IntroCutsceneProgress::Start)
-            .add_loopless_state(NormalEndingCutsceneProgress::Start)
+            .add_loopless_state(NormalEndingProgress::Start)
             .add_loopless_state(EndScreenProgress::Start);
     }
 }

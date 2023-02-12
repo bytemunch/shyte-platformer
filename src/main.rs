@@ -7,7 +7,7 @@ mod intro_cutscene;
 mod kinematic_physics;
 mod level;
 mod level_editor;
-mod normal_ending_cutscene;
+mod normal_ending;
 mod pause;
 mod player;
 mod states;
@@ -31,7 +31,7 @@ use intro_cutscene::IntroCutscenePlugin;
 use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
 use level_editor::LevelEditorPlugin;
-use normal_ending_cutscene::NormalEndingCutscenePlugin;
+use normal_ending::NormalEndingPlugin;
 use pause::PausePlugin;
 use player::PlayerPlugin;
 use states::StatesPlugin;
@@ -97,7 +97,7 @@ fn main() {
         .add_plugin(LevelEditorPlugin)
         .add_plugin(CutscenePlugin)
         .add_plugin(IntroCutscenePlugin)
-        .add_plugin(NormalEndingCutscenePlugin)
+        .add_plugin(NormalEndingPlugin)
         .add_plugin(EndScreenPlugin)
         // bevy_tween
         .add_plugin(TweeningPlugin)

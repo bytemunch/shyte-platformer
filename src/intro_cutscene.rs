@@ -60,8 +60,7 @@ impl Plugin for IntroCutscenePlugin {
 }
 
 fn cutscene_controller(mut commands: Commands, mut q_ev: EventReader<TweenCompleted>) {
-    // master cutscene controller
-    // todo this is gonna get messy, find a nice way of splitting it up?
+    // todo macro this? there's some way of automating this surely
     for ev in q_ev.iter() {
         let i = ev.user_data;
         match i.try_into() {

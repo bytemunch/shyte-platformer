@@ -10,7 +10,7 @@ use iyes_loopless::{
 use crate::{
     back_to_enum,
     cutscene::{title_text, BackgroundColorLens},
-    normal_ending_cutscene::despawn_normal_ending,
+    normal_ending::despawn_normal_ending,
     states::GameState,
     util::despawn_with,
     Ending,
