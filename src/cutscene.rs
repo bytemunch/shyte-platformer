@@ -4,12 +4,6 @@ use bevy::prelude::*;
 use bevy_tweening::{
     component_animator_system, lens::TextColorLens, Animator, Delay, EaseFunction, Lens, Tween,
 };
-use iyes_loopless::prelude::AppLooplessStateExt;
-
-use crate::{
-    end_screen::EndScreenProgress, intro_cutscene::IntroCutsceneProgress,
-    normal_ending::NormalEndingProgress,
-};
 
 #[derive(Component)]
 pub struct Dummy; // allows for custom delayed events, for mid-animation transitions
@@ -18,14 +12,9 @@ pub struct CutscenePlugin;
 
 impl Plugin for CutscenePlugin {
     fn build(&self, app: &mut App) {
-        // add all cutscene states
-        // run cutscene controller
         app.add_system(component_animator_system::<OrthographicProjection>)
             .add_system(component_animator_system::<BackgroundColor>)
-            .add_system(component_animator_system::<Dummy>)
-            .add_loopless_state(IntroCutsceneProgress::Start)
-            .add_loopless_state(NormalEndingProgress::Start)
-            .add_loopless_state(EndScreenProgress::Start);
+            .add_system(component_animator_system::<Dummy>);
     }
 }
 
@@ -177,7 +166,8 @@ pub fn title_text(
             end: Color::WHITE,
             section: 0,
         },
-    ).with_completed_event(user_data);
+    )
+    .with_completed_event(user_data);
 
     (
         TextBundle {

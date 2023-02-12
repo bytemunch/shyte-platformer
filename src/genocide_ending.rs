@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy_tweening::{
-    lens::{SpriteColorLens, TransformPositionLens},
-    Animator, Delay, EaseFunction, EaseMethod, Sequence, Tracks, Tween, TweenCompleted,
+    lens::TransformPositionLens, Animator, Delay, EaseFunction, EaseMethod, Sequence, Tracks,
+    Tween, TweenCompleted,
 };
 use iyes_loopless::{
     prelude::{AppLooplessStateExt, IntoConditionalSystem},
@@ -25,20 +25,18 @@ use crate::{
 
 back_to_enum! {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-    pub enum NormalEndingProgress {
+    pub enum GenocideEndingProgress {
         Start = 0,
         CameraZoomIn,
         SpeechLine1,
-        SpeechLine2,
-        ActorAnimation,
-        FuqheedJump,
-        RemovePlayer,
+        PlayerJump,
+        RemoveFuqheed,
         CameraZoomOut,
     }
 }
 
 #[derive(Component)]
-pub struct NormalEndingTag;
+pub struct GenocideEndingTag;
 
 #[derive(Component)]
 struct PlayerTag;
@@ -58,20 +56,18 @@ struct FuqheedFaceTag;
 #[derive(Component)]
 struct FuqheedBodyTag;
 
-pub struct NormalEndingPlugin;
+pub struct GenocideEndingPlugin;
 
-impl Plugin for NormalEndingPlugin {
+impl Plugin for GenocideEndingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_loopless_state(NormalEndingProgress::Start)
-            .add_enter_system(GameState::NormalEnding, start)
-            .add_enter_system(NormalEndingProgress::CameraZoomIn, camera_zoom_in)
-            .add_enter_system(NormalEndingProgress::SpeechLine1, speech_line_1)
-            .add_enter_system(NormalEndingProgress::SpeechLine2, speech_line_2)
-            .add_enter_system(NormalEndingProgress::ActorAnimation, actor_animation)
-            .add_enter_system(NormalEndingProgress::FuqheedJump, fuqheed_jump)
-            .add_enter_system(NormalEndingProgress::RemovePlayer, remove_player)
-            .add_enter_system(NormalEndingProgress::CameraZoomOut, camera_zoom_out)
-            .add_system(cutscene_controller.run_in_state(GameState::NormalEnding));
+        app.add_loopless_state(GenocideEndingProgress::Start)
+            .add_enter_system(GameState::GenocideEnding, start)
+            .add_enter_system(GenocideEndingProgress::CameraZoomIn, camera_zoom_in)
+            .add_enter_system(GenocideEndingProgress::SpeechLine1, speech_line_1)
+            .add_enter_system(GenocideEndingProgress::PlayerJump, player_jump)
+            .add_enter_system(GenocideEndingProgress::RemoveFuqheed, remove_fuqheed)
+            .add_enter_system(GenocideEndingProgress::CameraZoomOut, camera_zoom_out)
+            .add_system(cutscene_controller.run_in_state(GameState::GenocideEnding));
     }
 }
 
@@ -79,28 +75,22 @@ fn cutscene_controller(mut commands: Commands, mut q_ev: EventReader<TweenComple
     for ev in q_ev.iter() {
         let i = ev.user_data;
         match i.try_into() {
-            Ok(NormalEndingProgress::Start) => {
-                commands.insert_resource(NextState(NormalEndingProgress::CameraZoomIn))
+            Ok(GenocideEndingProgress::Start) => {
+                commands.insert_resource(NextState(GenocideEndingProgress::CameraZoomIn))
             }
-            Ok(NormalEndingProgress::CameraZoomIn) => {
-                commands.insert_resource(NextState(NormalEndingProgress::SpeechLine1))
+            Ok(GenocideEndingProgress::CameraZoomIn) => {
+                commands.insert_resource(NextState(GenocideEndingProgress::SpeechLine1))
             }
-            Ok(NormalEndingProgress::SpeechLine1) => {
-                commands.insert_resource(NextState(NormalEndingProgress::SpeechLine2))
+            Ok(GenocideEndingProgress::SpeechLine1) => {
+                commands.insert_resource(NextState(GenocideEndingProgress::PlayerJump))
             }
-            Ok(NormalEndingProgress::SpeechLine2) => {
-                commands.insert_resource(NextState(NormalEndingProgress::ActorAnimation))
+            Ok(GenocideEndingProgress::PlayerJump) => {
+                commands.insert_resource(NextState(GenocideEndingProgress::RemoveFuqheed))
             }
-            Ok(NormalEndingProgress::ActorAnimation) => {
-                commands.insert_resource(NextState(NormalEndingProgress::FuqheedJump))
+            Ok(GenocideEndingProgress::RemoveFuqheed) => {
+                commands.insert_resource(NextState(GenocideEndingProgress::CameraZoomOut))
             }
-            Ok(NormalEndingProgress::FuqheedJump) => {
-                commands.insert_resource(NextState(NormalEndingProgress::RemovePlayer))
-            }
-            Ok(NormalEndingProgress::RemovePlayer) => {
-                commands.insert_resource(NextState(NormalEndingProgress::CameraZoomOut))
-            }
-            Ok(NormalEndingProgress::CameraZoomOut) => {
+            Ok(GenocideEndingProgress::CameraZoomOut) => {
                 commands.insert_resource(NextState(GameState::EndScreen))
             }
             Err(_) => println!("error"),
@@ -135,7 +125,7 @@ fn start(
                 end: Vec3::new(195., FLOOR_0 + PLAYER_RADIUS, 10.),
             },
         )))
-        .insert(NormalEndingTag)
+        .insert(GenocideEndingTag)
         .insert(PlayerTag)
         .with_children(|cb| {
             cb.spawn(SpriteBundle {
@@ -187,7 +177,7 @@ fn start(
             },
         )))
         .insert(FuqheedTag)
-        .insert(NormalEndingTag)
+        .insert(GenocideEndingTag)
         .with_children(|cb| {
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_outline.clone().unwrap(),
@@ -232,11 +222,11 @@ fn start(
         &mut materials,
     );
 
-    commands.entity(b1).insert(NormalEndingTag);
+    commands.entity(b1).insert(GenocideEndingTag);
 
     ev_w.send(TweenCompleted {
         entity: player,
-        user_data: NormalEndingProgress::Start as u64,
+        user_data: GenocideEndingProgress::Start as u64,
     })
 }
 
@@ -261,7 +251,7 @@ fn camera_zoom_in(
                 end: Vec3::new(200., ZOOM_Y_OFFSET, 0.),
             },
         )
-        .with_completed_event(NormalEndingProgress::CameraZoomIn as u64);
+        .with_completed_event(GenocideEndingProgress::CameraZoomIn as u64);
 
         commands
             .entity(camera)
@@ -276,84 +266,20 @@ fn speech_line_1(mut commands: Commands, asset_server: Res<AssetServer>) {
         400.,
         700.,
         asset_server.load("fonts/Chalk-Regular.ttf"),
-        NormalEndingProgress::SpeechLine1 as u64,
+        GenocideEndingProgress::SpeechLine1 as u64,
     ));
-}
-
-fn speech_line_2(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    texture_handles: Res<TextureHandles>,
-
-    mut q_player_face: Query<&mut Handle<Image>, With<PlayerFaceTag>>,
-    mut q_player_body: Query<Entity, With<PlayerBodyTag>>,
-) {
-    commands.spawn(dialogue_text(
-        "loll dumb name",
-        410.,
-        300.,
-        asset_server.load("fonts/Chalk-Regular.ttf"),
-        NormalEndingProgress::SpeechLine2 as u64,
-    ));
-
-    // change player expression
-    for mut h in q_player_face.iter_mut() {
-        *h = texture_handles.char_face_laughing.clone().unwrap();
-    }
-
-    // change player color to enemy color
-    let red_to_green = Tween::new(
-        EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(0.3),
-        SpriteColorLens {
-            start: Color::RED,
-            end: Color::GREEN,
-        },
-    );
-
-    if let Ok(player) = q_player_body.get_single_mut() {
-        commands.entity(player).insert(Animator::new(red_to_green));
-    }
-}
-
-fn actor_animation(
-    mut q_fuqheed_face: Query<&mut Handle<Image>, With<FuqheedFaceTag>>,
-    mut q_fuqheed_body: Query<Entity, With<FuqheedBodyTag>>,
-    texture_handles: Res<TextureHandles>,
-    mut commands: Commands,
-) {
-    // mr fuqheed gets angry then jumps on the player, killing him
-    let yellow_to_red = Tween::new(
-        EaseFunction::QuadraticOut,
-        Duration::from_secs_f32(0.3),
-        SpriteColorLens {
-            start: Color::YELLOW,
-            end: Color::RED,
-        },
-    )
-    .with_completed_event(NormalEndingProgress::ActorAnimation as u64);
-
-    if let Ok(player_body) = q_fuqheed_body.get_single_mut() {
-        commands
-            .entity(player_body)
-            .insert(Animator::new(yellow_to_red));
-    }
-
-    // make fuqheed face angry
-    for mut h in q_fuqheed_face.iter_mut() {
-        *h = texture_handles.char_face_angry.clone().unwrap();
-    }
 }
 
 const JUMP_APEX: f32 = 2.3;
 
-fn fuqheed_jump(mut commands: Commands, mut q_fuqheed: Query<Entity, With<FuqheedTag>>) {
+// TODO
+fn player_jump(mut commands: Commands, mut q_player: Query<Entity, With<PlayerTag>>) {
     let right_to_left = Tween::new(
         EaseFunction::QuadraticOut,
         Duration::from_secs_f32(0.6),
         TransformTranslationXLens {
-            start: 205.,
-            end: 195.,
+            start: 195.,
+            end: 205.,
         },
     );
 
@@ -374,7 +300,7 @@ fn fuqheed_jump(mut commands: Commands, mut q_fuqheed: Query<Entity, With<Fuqhee
             end: FLOOR_0 + PLAYER_RADIUS * 2.,
         },
     )
-    .with_completed_event(NormalEndingProgress::FuqheedJump as u64);
+    .with_completed_event(GenocideEndingProgress::PlayerJump as u64);
 
     let bounce_up = Tween::new(
         EaseFunction::QuadraticOut,
@@ -399,23 +325,25 @@ fn fuqheed_jump(mut commands: Commands, mut q_fuqheed: Query<Entity, With<Fuqhee
 
     let tracks = Tracks::new([x_seq, y_seq]);
 
-    if let Ok(fuqheed) = q_fuqheed.get_single_mut() {
-        commands.entity(fuqheed).insert(Animator::new(tracks));
+    if let Ok(player) = q_player.get_single_mut() {
+        commands.entity(player).insert(Animator::new(tracks));
     }
 }
 
-fn remove_player(
+fn remove_fuqheed(
     mut commands: Commands,
-    q_player: Query<Entity, With<PlayerTag>>,
+    q_fuqheed: Query<Entity, With<FuqheedTag>>,
     mut ev_w: EventWriter<TweenCompleted>,
 ) {
-    if let Ok(player) = q_player.get_single() {
-        commands.entity(player).despawn_recursive();
+    if let Ok(fuqheed) = q_fuqheed.get_single() {
+        commands.entity(fuqheed).despawn_recursive();
     }
 
+    // TODO player exit stage right
+
     ev_w.send(TweenCompleted {
-        entity: commands.spawn(NormalEndingTag).id(),
-        user_data: NormalEndingProgress::RemovePlayer as u64,
+        entity: commands.spawn(GenocideEndingTag).id(),
+        user_data: GenocideEndingProgress::RemoveFuqheed as u64,
     })
 }
 
@@ -438,7 +366,7 @@ fn camera_zoom_out(mut commands: Commands, mut q_camera: Query<Entity, With<Came
     );
 
     let dummy_delay: Delay<Dummy> = Delay::new(Duration::from_secs_f32(0.3))
-        .with_completed_event(NormalEndingProgress::CameraZoomOut as u64);
+        .with_completed_event(GenocideEndingProgress::CameraZoomOut as u64);
 
     // set camera transfrom animations
     if let Ok(camera) = q_camera.get_single_mut() {
@@ -451,6 +379,6 @@ fn camera_zoom_out(mut commands: Commands, mut q_camera: Query<Entity, With<Came
     }
 }
 
-pub fn despawn_normal_ending(commands: Commands, q: Query<Entity, With<NormalEndingTag>>) {
+pub fn despawn_genocide_ending(commands: Commands, q: Query<Entity, With<GenocideEndingTag>>) {
     despawn_with(commands, q)
 }

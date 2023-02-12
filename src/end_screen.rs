@@ -10,10 +10,10 @@ use iyes_loopless::{
 use crate::{
     back_to_enum,
     cutscene::{title_text, BackgroundColorLens},
+    genocide_ending::despawn_genocide_ending,
     normal_ending::despawn_normal_ending,
     states::GameState,
     util::despawn_with,
-    Ending,
 };
 
 back_to_enum! {
@@ -27,6 +27,16 @@ back_to_enum! {
     }
 }
 
+#[derive(Resource)]
+pub struct Ending(pub Endings);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Endings {
+    Normal,
+    Genocide,
+    Pacifist,
+}
+
 #[derive(Component)]
 struct EndScreenTag;
 
@@ -37,12 +47,14 @@ pub struct EndScreenPlugin;
 
 impl Plugin for EndScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::EndScreen, fade_to_black)
+        app.add_loopless_state(EndScreenProgress::Start)
+            .add_enter_system(GameState::EndScreen, fade_to_black)
             .add_enter_system(EndScreenProgress::WinTitle, win_title)
             .add_enter_system(EndScreenProgress::WinSubtitle, win_subtitle)
             .add_enter_system(EndScreenProgress::OkButton, ok_button)
             .add_exit_system(GameState::EndScreen, despawn_end_screen)
             .add_exit_system(GameState::EndScreen, despawn_normal_ending)
+            .add_exit_system(GameState::EndScreen, despawn_genocide_ending)
             .add_system(ok_button_pressed.run_in_state(GameState::EndScreen))
             .add_system(cutscene_controller.run_in_state(GameState::EndScreen));
     }
@@ -123,9 +135,9 @@ fn win_title(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn win_subtitle(mut commands: Commands, asset_server: Res<AssetServer>, ending_id: Res<Ending>) {
     let mut ending_type: String = match ending_id.0 {
-        0 => "normal".to_owned(),
-        1 => "genocide".to_owned(),
-        2 => "pacifist".to_owned(),
+        Endings::Normal => "normal".to_owned(),
+        Endings::Genocide => "genocide".to_owned(),
+        Endings::Pacifist => "pacifist".to_owned(),
         _ => "error".to_owned(),
     };
 

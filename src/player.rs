@@ -11,7 +11,7 @@ use crate::{
     kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity},
     level::Trigger,
     states::{GameState, PauseState},
-    Actor, InGameItem, SystemOrderLabel, TextureHandles, Ending,
+    Actor, InGameItem, SystemOrderLabel, TextureHandles, end_screen::{Endings, Ending},
 };
 
 #[derive(Component)]
@@ -64,7 +64,7 @@ fn detect_triggers(
     if let Ok(player) = q_player.get_single() {
         for trigger in q_triggers.iter() {
             if rapier_context.intersection_pair(player, trigger) == Some(true) {
-                commands.insert_resource(Ending(0));
+                commands.insert_resource(Ending(Endings::Normal));
                 commands.insert_resource(NextState(GameState::NormalEnding));
             }
         }

@@ -5,7 +5,10 @@ use bevy_tweening::{
     lens::{SpriteColorLens, TransformPositionLens},
     Animator, EaseFunction, Tween, TweenCompleted,
 };
-use iyes_loopless::{prelude::{AppLooplessStateExt, IntoConditionalSystem}, state::NextState};
+use iyes_loopless::{
+    prelude::{AppLooplessStateExt, IntoConditionalSystem},
+    state::NextState,
+};
 
 use crate::{
     back_to_enum,
@@ -48,7 +51,8 @@ pub struct IntroCutscenePlugin;
 
 impl Plugin for IntroCutscenePlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::IntroCutscene, start)
+        app.add_loopless_state(IntroCutsceneProgress::Start)
+            .add_enter_system(GameState::IntroCutscene, start)
             .add_enter_system(IntroCutsceneProgress::CameraZoomIn, camera_zoom_in)
             .add_enter_system(IntroCutsceneProgress::SpeechLine1, speech_line_1)
             .add_enter_system(IntroCutsceneProgress::SpeechLine2, speech_line_2)

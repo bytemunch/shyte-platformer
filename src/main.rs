@@ -2,6 +2,7 @@ mod background;
 mod cutscene;
 mod end_screen;
 mod enemy;
+mod genocide_ending;
 mod interfaces;
 mod intro_cutscene;
 mod kinematic_physics;
@@ -26,6 +27,7 @@ use bevy_parallax::ParallaxCameraComponent;
 use bevy_tweening::TweeningPlugin;
 use cutscene::CutscenePlugin;
 use end_screen::EndScreenPlugin;
+use genocide_ending::GenocideEndingPlugin;
 use interfaces::UserInterfacesPlugin;
 use intro_cutscene::IntroCutscenePlugin;
 use kinematic_physics::KinematicPhysics;
@@ -40,9 +42,6 @@ use util::despawn_with;
 pub const CAMERA_SCALE: f32 = 1. / 24.;
 
 pub const DEATHPLANE: f32 = -25.;
-
-#[derive(Resource)]
-pub struct Ending(u64);
 
 #[derive(Component)]
 pub struct Actor;
@@ -98,6 +97,7 @@ fn main() {
         .add_plugin(CutscenePlugin)
         .add_plugin(IntroCutscenePlugin)
         .add_plugin(NormalEndingPlugin)
+        .add_plugin(GenocideEndingPlugin)
         .add_plugin(EndScreenPlugin)
         // bevy_tween
         .add_plugin(TweeningPlugin)
