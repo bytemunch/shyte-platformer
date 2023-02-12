@@ -1,16 +1,17 @@
 mod background;
+mod cutscene;
+mod end_screen;
 mod enemy;
 mod interfaces;
+mod intro_cutscene;
 mod kinematic_physics;
 mod level;
 mod level_editor;
+mod normal_ending_cutscene;
 mod pause;
 mod player;
 mod states;
 mod util;
-mod cutscene;
-mod intro_cutscene;
-mod normal_ending_cutscene;
 
 use background::BackgroundPlugin;
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
@@ -24,8 +25,9 @@ use bevy_parallax::ParallaxCameraComponent;
 
 use bevy_tweening::TweeningPlugin;
 use cutscene::CutscenePlugin;
-use intro_cutscene::IntroCutscenePlugin;
+use end_screen::EndScreenPlugin;
 use interfaces::UserInterfacesPlugin;
+use intro_cutscene::IntroCutscenePlugin;
 use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
 use level_editor::LevelEditorPlugin;
@@ -38,6 +40,9 @@ use util::despawn_with;
 pub const CAMERA_SCALE: f32 = 1. / 24.;
 
 pub const DEATHPLANE: f32 = -25.;
+
+#[derive(Resource)]
+pub struct Ending(u64);
 
 #[derive(Component)]
 pub struct Actor;
@@ -93,6 +98,7 @@ fn main() {
         .add_plugin(CutscenePlugin)
         .add_plugin(IntroCutscenePlugin)
         .add_plugin(NormalEndingCutscenePlugin)
+        .add_plugin(EndScreenPlugin)
         // bevy_tween
         .add_plugin(TweeningPlugin)
         // particles
@@ -126,7 +132,7 @@ fn load_textures(mut commands: Commands, asset_server: Res<AssetServer>) {
         respect_fill: asset_server.load("img/respect_bar_fill.png").into(),
         chalk_line_horizontal: None,
         chalk_box_fill: None,
-        char_face_neutral: asset_server.load("img/character/face_neutral.png").into()
+        char_face_neutral: asset_server.load("img/character/face_neutral.png").into(),
     });
     commands.insert_resource(RepeatX {
         handle: asset_server.load("img/chalk_line_horizontal.png"),

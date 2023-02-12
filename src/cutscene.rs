@@ -7,8 +7,12 @@ use bevy_tweening::{
 use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::{
-    intro_cutscene::IntroCutsceneProgress, normal_ending_cutscene::NormalEndingCutsceneProgress,
+    end_screen::EndScreenProgress, intro_cutscene::IntroCutsceneProgress,
+    normal_ending_cutscene::NormalEndingCutsceneProgress,
 };
+
+#[derive(Component)]
+pub struct Dummy; // allows for custom delayed events, for mid-animation transitions
 
 pub struct CutscenePlugin;
 
@@ -17,8 +21,11 @@ impl Plugin for CutscenePlugin {
         // add all cutscene states
         // run cutscene controller
         app.add_system(component_animator_system::<OrthographicProjection>)
+            .add_system(component_animator_system::<BackgroundColor>)
+            .add_system(component_animator_system::<Dummy>)
             .add_loopless_state(IntroCutsceneProgress::Start)
-            .add_loopless_state(NormalEndingCutsceneProgress::Start);
+            .add_loopless_state(NormalEndingCutsceneProgress::Start)
+            .add_loopless_state(EndScreenProgress::Start);
     }
 }
 
@@ -73,6 +80,22 @@ impl Lens<Transform> for TransformTranslationYLens {
     }
 }
 
+// style color
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct BackgroundColorLens {
+    pub start: Color,
+    pub end: Color,
+}
+
+impl Lens<BackgroundColor> for BackgroundColorLens {
+    fn lerp(&mut self, target: &mut BackgroundColor, ratio: f32) {
+        let start: Vec4 = self.start.into();
+        let end: Vec4 = self.end.into();
+        let value = start.lerp(end, ratio);
+        target.0 = value.into();
+    }
+}
+
 // tweens
 
 // consts
@@ -112,24 +135,73 @@ pub fn dialogue_text(
     let speech_seq = speech_in.then(speech_hold).then(speech_out);
 
     (
-        (TextBundle::from_section(
-            value,
-            TextStyle {
-                font,
-                font_size: 40.0,
-                color: Color::rgba(0.9, 0.9, 0.9, 0.),
-            },
-        ))
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            position: UiRect {
-                top: Val::Px(top),
-                left: Val::Px(left),
+        TextBundle {
+            z_index: ZIndex::Global(10),
+            style: Style {
+                position_type: PositionType::Absolute,
+                position: UiRect {
+                    top: Val::Px(top),
+                    left: Val::Px(left),
+                    ..default()
+                },
                 ..default()
             },
+            text: Text::from_section(
+                value,
+                TextStyle {
+                    font,
+                    font_size: 40.0,
+                    color: Color::rgba(0.9, 0.9, 0.9, 0.),
+                },
+            ),
             ..default()
-        }),
+        },
         Animator::new(speech_seq),
+    )
+}
+
+pub fn title_text(
+    value: impl Into<String>,
+    top: f32,
+    left: f32,
+    font: Handle<Font>,
+    user_data: u64,
+    font_size: f32,
+) -> (TextBundle, Animator<Text>) {
+    // todo dry
+    let title_in = Tween::new(
+        EaseFunction::QuadraticOut,
+        Duration::from_secs_f32(0.3),
+        TextColorLens {
+            start: Color::NONE,
+            end: Color::WHITE,
+            section: 0,
+        },
+    ).with_completed_event(user_data);
+
+    (
+        TextBundle {
+            z_index: ZIndex::Global(10),
+            style: Style {
+                position_type: PositionType::Absolute,
+                position: UiRect {
+                    top: Val::Px(top),
+                    left: Val::Px(left),
+                    ..default()
+                },
+                ..default()
+            },
+            text: Text::from_section(
+                value,
+                TextStyle {
+                    font,
+                    font_size,
+                    color: Color::rgba(0.9, 0.9, 0.9, 0.),
+                },
+            ),
+            ..default()
+        },
+        Animator::new(title_in),
     )
 }
 

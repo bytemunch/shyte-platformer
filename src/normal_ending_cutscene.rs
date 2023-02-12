@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_tweening::{
     lens::{SpriteColorLens, TransformPositionLens},
-    Animator, EaseFunction, EaseMethod, Sequence, Tracks, Tween, TweenCompleted,
+    Animator, Delay, EaseFunction, EaseMethod, Sequence, Tracks, Tween, TweenCompleted,
 };
 use iyes_loopless::{
     prelude::{AppLooplessStateExt, IntoConditionalSystem},
@@ -13,7 +13,7 @@ use iyes_loopless::{
 use crate::{
     back_to_enum,
     cutscene::{
-        dialogue_text, OrthographicProjectionScaleLens, TransformTranslationXLens,
+        dialogue_text, Dummy, OrthographicProjectionScaleLens, TransformTranslationXLens,
         TransformTranslationYLens,
     },
     level::{create_box, FLOOR_0, FLOOR_0_BOTTOM},
@@ -38,7 +38,7 @@ back_to_enum! {
 }
 
 #[derive(Component)]
-struct NormalEndingCutsceneTag;
+pub struct NormalEndingCutsceneTag;
 
 #[derive(Component)]
 struct PlayerTag;
@@ -73,7 +73,6 @@ impl Plugin for NormalEndingCutscenePlugin {
             .add_enter_system(NormalEndingCutsceneProgress::FuqheedJump, fuqheed_jump)
             .add_enter_system(NormalEndingCutsceneProgress::RemovePlayer, remove_player)
             .add_enter_system(NormalEndingCutsceneProgress::CameraZoomOut, camera_zoom_out)
-            .add_exit_system(GameState::NormalEndingCutscene, despawn_intro_cutscene)
             .add_system(cutscene_controller.run_in_state(GameState::NormalEndingCutscene));
     }
 }
@@ -106,7 +105,7 @@ fn cutscene_controller(mut commands: Commands, mut q_ev: EventReader<TweenComple
                 commands.insert_resource(NextState(NormalEndingCutsceneProgress::CameraZoomOut))
             }
             Ok(NormalEndingCutsceneProgress::CameraZoomOut) => {
-                commands.insert_resource(NextState(GameState::MainMenu))
+                commands.insert_resource(NextState(GameState::EndScreen))
             }
             Err(_) => println!("error"),
         }
@@ -446,22 +445,22 @@ fn camera_zoom_out(mut commands: Commands, mut q_camera: Query<Entity, With<Came
             end: Vec3::new(200., 0., 0.),
             start: Vec3::new(200., ZOOM_Y_OFFSET, 0.),
         },
-    )
-    .with_completed_event(NormalEndingCutsceneProgress::CameraZoomOut as u64);
+    );
+
+    let dummy_delay: Delay<Dummy> = Delay::new(Duration::from_secs_f32(0.3))
+        .with_completed_event(NormalEndingCutsceneProgress::CameraZoomOut as u64);
 
     // set camera transfrom animations
     if let Ok(camera) = q_camera.get_single_mut() {
         commands
             .entity(camera)
+            .insert(Dummy)
             .insert(Animator::new(translate))
-            .insert(Animator::new(proj_scale));
+            .insert(Animator::new(proj_scale))
+            .insert(Animator::new(dummy_delay));
     }
-
-    // todo fade to black
-
-    // todo "game complete, normal ending" message
 }
 
-fn despawn_intro_cutscene(commands: Commands, q: Query<Entity, With<NormalEndingCutsceneTag>>) {
+pub fn despawn_normal_ending(commands: Commands, q: Query<Entity, With<NormalEndingCutsceneTag>>) {
     despawn_with(commands, q)
 }

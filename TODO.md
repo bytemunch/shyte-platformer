@@ -8,7 +8,11 @@ BUG: enemies don't bounce off eachother
 
 BUG: font spills over button graphic for resume
 
+BUG: win screen ok button text not centered
+
 ## TODOS
+
+TODO: win screen OK button fade in
 
 TODO: ending cutscenes based on respect meter
 
@@ -17,10 +21,6 @@ TODO: move respect meter
 TODO: genocide cutscene: meet mr fuqheed, jump on him
 
 TODO: pacifist cutscene: meet mr fuqheed, calm down, sympathise
-
-TODO: ending cutscene fadeout
-
-TODO: win screen
 
 ## NOTES
 
