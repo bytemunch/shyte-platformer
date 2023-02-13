@@ -8,10 +8,11 @@ use iyes_loopless::{
 };
 
 use crate::{
+    end_screen::{Ending, Endings},
     kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity},
     level::Trigger,
     states::{GameState, PauseState},
-    Actor, InGameItem, SystemOrderLabel, TextureHandles, end_screen::{Endings, Ending},
+    Actor, InGameItem, SystemOrderLabel, TextureHandles, CAMERA_SCALE,
 };
 
 #[derive(Component)]
@@ -199,12 +200,14 @@ fn player_movement(
 
 fn camera_follow_player(
     mut camera_transform: Query<&mut Transform, With<Camera2d>>,
-    query: Query<&GlobalTransform, With<Player>>,
+    q_player: Query<&GlobalTransform, With<Player>>,
+    windows: Res<Windows>,
 ) {
     // set camera translation to player translation
-    for player_transform in &query {
+    for player_transform in &q_player {
+        let window = windows.get_primary().unwrap();
         camera_transform.single_mut().translation = Vec3::new(
-            player_transform.translation().x + 20.,
+            player_transform.translation().x + (window.width() * 0.4 * CAMERA_SCALE),
             0.,
             // player_transform.translation().y + 25.,
             0.,
