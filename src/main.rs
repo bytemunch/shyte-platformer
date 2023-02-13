@@ -9,6 +9,7 @@ mod kinematic_physics;
 mod level;
 mod level_editor;
 mod normal_ending;
+mod pacifist_ending;
 mod pause;
 mod player;
 mod states;
@@ -34,6 +35,7 @@ use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
 use level_editor::LevelEditorPlugin;
 use normal_ending::NormalEndingPlugin;
+use pacifist_ending::PacifistEndingPlugin;
 use pause::PausePlugin;
 use player::PlayerPlugin;
 use states::StatesPlugin;
@@ -98,6 +100,7 @@ fn main() {
         .add_plugin(IntroCutscenePlugin)
         .add_plugin(NormalEndingPlugin)
         .add_plugin(GenocideEndingPlugin)
+        .add_plugin(PacifistEndingPlugin)
         .add_plugin(EndScreenPlugin)
         // bevy_tween
         .add_plugin(TweeningPlugin)

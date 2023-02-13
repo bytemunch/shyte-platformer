@@ -18,7 +18,7 @@ TODO: ending cutscenes based on respect meter
 
 TODO: move respect meter
 
-TODO: pacifist cutscene: meet mr fuqheed, calm down, sympathise
+TODO: better font
 
 ## NOTES
 

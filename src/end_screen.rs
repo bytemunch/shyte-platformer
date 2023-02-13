@@ -12,6 +12,7 @@ use crate::{
     cutscene::{title_text, BackgroundColorLens},
     genocide_ending::despawn_genocide_ending,
     normal_ending::despawn_normal_ending,
+    pacifist_ending::despawn_pacifist_ending,
     states::GameState,
     util::despawn_with,
 };
@@ -55,6 +56,7 @@ impl Plugin for EndScreenPlugin {
             .add_exit_system(GameState::EndScreen, despawn_end_screen)
             .add_exit_system(GameState::EndScreen, despawn_normal_ending)
             .add_exit_system(GameState::EndScreen, despawn_genocide_ending)
+            .add_exit_system(GameState::EndScreen, despawn_pacifist_ending)
             .add_system(ok_button_pressed.run_in_state(GameState::EndScreen))
             .add_system(cutscene_controller.run_in_state(GameState::EndScreen));
     }
