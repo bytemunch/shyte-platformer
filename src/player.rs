@@ -9,8 +9,9 @@ use iyes_loopless::{
 
 use crate::{
     end_screen::{Ending, Endings},
+    enemy::Enemy,
     kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity},
-    level::Trigger,
+    level::{LevelEnemyCount, Trigger},
     states::{GameState, PauseState},
     Actor, InGameItem, SystemOrderLabel, TextureHandles, CAMERA_SCALE,
 };
@@ -61,12 +62,28 @@ fn detect_triggers(
     q_player: Query<Entity, With<Player>>,
     q_triggers: Query<Entity, With<Trigger>>,
     mut commands: Commands,
+    level_enemy_count: Res<LevelEnemyCount>,
+    q_enemies: Query<&Enemy>,
 ) {
     if let Ok(player) = q_player.get_single() {
         for trigger in q_triggers.iter() {
             if rapier_context.intersection_pair(player, trigger) == Some(true) {
-                commands.insert_resource(Ending(Endings::Normal));
-                commands.insert_resource(NextState(GameState::NormalEnding));
+                let alive_enemies = q_enemies.iter().count();
+
+                println!("ALIVE: {}/{}",alive_enemies,level_enemy_count.0);
+
+                if alive_enemies == 0 {
+                    // genocide
+                    commands.insert_resource(Ending(Endings::Genocide));
+                    commands.insert_resource(NextState(GameState::GenocideEnding));
+                } else if alive_enemies == level_enemy_count.0 {
+                    // pacifist
+                    commands.insert_resource(Ending(Endings::Pacifist));
+                    commands.insert_resource(NextState(GameState::PacifistEnding));
+                } else {
+                    commands.insert_resource(Ending(Endings::Normal));
+                    commands.insert_resource(NextState(GameState::NormalEnding));
+                }
             }
         }
     }

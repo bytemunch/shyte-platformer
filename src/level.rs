@@ -289,6 +289,9 @@ pub const FLOOR_1: f32 = 0.;
 pub const FLOOR_0_BOTTOM: f32 = -15.;
 pub const FLOOR_1_BOTTOM: f32 = -5.;
 
+#[derive(Resource)]
+pub struct LevelEnemyCount(pub usize);
+
 fn setup_level(
     mut commands: Commands,
     texture_handles: Res<TextureHandles>,
@@ -568,6 +571,9 @@ fn setup_level(
             FLOOR_0 - 0.5,
             10.,
         )));
+
+    // enter level enemy count
+    commands.insert_resource(LevelEnemyCount(13));
 }
 
 fn despawn_level(commands: Commands, query: Query<Entity, With<InGameItem>>) {

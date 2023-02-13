@@ -10,11 +10,13 @@ BUG: font spills over button graphic for resume
 
 BUG: win screen ok button text not centered
 
+BUG: small window can cut off top + bottom of level. camera scale should be `Res<CameraScale>` set according to window height
+
+BUG: cutscene text appears at wrong place at different window sizes
+
+BUG: win screen text appears at wrong place at different window sizes. use flexbox better
+
 ## TODOS
-
-TODO: win screen OK button fade in
-
-TODO: ending cutscenes based on respect meter
 
 TODO: move respect meter
 
@@ -32,6 +34,8 @@ NOTE: Adding multiple of the same component overwrites previous component.
 ## LATER
 
 TODO: animate chalk
+
+TODO: win screen OK button fade in
 
 TODO: tween player to end cutscene position
 
