@@ -99,7 +99,7 @@ fn cutscene_controller(mut commands: Commands, mut q_ev: EventReader<TweenComple
 }
 
 const ZOOM_IN_TIME: f32 = 2.5;
-const ZOOM_OUT_TIME: f32 = 4.5;
+const ZOOM_OUT_TIME: f32 = 1.;
 const ZOOM_Y_OFFSET: f32 = -5.;
 const ZOOM_FACTOR: f32 = 0.5;
 

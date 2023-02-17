@@ -89,7 +89,7 @@ fn cutscene_controller(mut commands: Commands, mut q_ev: EventReader<TweenComple
     }
 }
 
-const FADE_TIME: f32 = 1.5;
+const FADE_TIME: f32 = 0.5;
 
 fn fade_to_black(mut commands: Commands) {
     let fade_in = Tween::new(

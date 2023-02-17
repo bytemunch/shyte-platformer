@@ -303,8 +303,8 @@ fn setup_level(
     spawn_player(
         &mut commands,
         &texture_handles,
-        // Vec3::new(174., FLOOR_0 + 14.8, 10.), // end testing
-        Vec3::new(0., FLOOR_0 + 0.8, 10.),
+        Vec3::new(174., FLOOR_0 + 14.8, 10.), // end testing
+        // Vec3::new(0., FLOOR_0 + 0.8, 10.),
     );
 
     // first static enemy

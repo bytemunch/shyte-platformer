@@ -14,7 +14,7 @@ BUG: cutscene text appears at wrong place at different window sizes
 
 BUG: win screen text appears at wrong place at different window sizes. use flexbox better
 
-BUG: ending zoom out does not finish by time OK button on end screen turns up
+BUG: returning to menu from end screen breaks background scaling
 
 ## TODOS
 
@@ -77,3 +77,5 @@ REFAC: cutscene / dialogue system
 REFAC: kinematic physics ordering/labelling
 
 REFAC: level vec for platforms and enemies, iterate and spawn instead of writing out helper fns lmao
+
+REFAC: background

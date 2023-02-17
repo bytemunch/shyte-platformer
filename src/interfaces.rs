@@ -216,7 +216,7 @@ fn play_button(mut commands: Commands, button_query: Query<&Interaction, With<Pl
     for interact in &button_query {
         match *interact {
             Interaction::Clicked => {
-                commands.insert_resource(NextState(GameState::IntroCutscene));
+                commands.insert_resource(NextState(GameState::InGame));
             }
             Interaction::Hovered => {}
             Interaction::None => {}
