@@ -16,8 +16,6 @@ BUG: returning to menu from end screen breaks background scaling
 
 ## TODOS
 
-TODO: move respect meter
-
 TODO: use Text2dBundle for dialogue
 
 ## NOTES
@@ -75,3 +73,5 @@ REFAC: kinematic physics ordering/labelling
 REFAC: level vec for platforms and enemies, iterate and spawn instead of writing out helper fns lmao
 
 REFAC: background
+
+REFAC: respect meter should resize with window

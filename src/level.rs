@@ -226,6 +226,10 @@ fn setup_ingame_ui(mut commands: Commands, texture_handles: Res<TextureHandles>)
         .spawn(NodeBundle {
             style: Style {
                 position_type: PositionType::Absolute,
+                position: UiRect {
+                    right: Val::Px(0.),
+                    ..default()
+                },
                 size: Size::new(Val::Px(BAR_WIDTH), Val::Px(BAR_HEIGHT)),
                 ..default()
             },
