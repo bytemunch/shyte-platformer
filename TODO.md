@@ -10,17 +10,19 @@ BUG: font spills over button graphic for resume
 
 BUG: win screen ok button text not centered
 
-BUG: small window can cut off top + bottom of level. camera scale should be `Res<CameraScale>` set according to window height
-
 BUG: cutscene text appears at wrong place at different window sizes
 
 BUG: win screen text appears at wrong place at different window sizes. use flexbox better
+
+BUG: ending zoom out does not finish by time OK button on end screen turns up
 
 ## TODOS
 
 TODO: move respect meter
 
 TODO: better font
+
+TODO: use Text2dBundle for dialogue
 
 ## NOTES
 
@@ -70,7 +72,7 @@ CREEP: 9-Patch box drawing
 
 REFAC: font as resource / default font
 
-REFAC: cutscene / dialogue system w/ world-screen transform for speech
+REFAC: cutscene / dialogue system
 
 REFAC: kinematic physics ordering/labelling
 

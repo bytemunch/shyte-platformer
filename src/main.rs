@@ -20,6 +20,7 @@ use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::render::render_resource::{AddressMode, SamplerDescriptor};
 use bevy::render::texture::ImageSampler;
+use bevy::window::WindowResized;
 use bevy_particle_systems::ParticleSystemPlugin;
 use bevy_rapier2d::prelude::*;
 
@@ -87,6 +88,7 @@ fn main() {
         .add_system_to_stage(CoreStage::PreUpdate, remove_dead_actors)
         // testing
         .add_system(fixup_images)
+        .add_system(set_scale_from_window)
         // my plugins
         .add_plugin(BackgroundPlugin)
         .add_plugin(StatesPlugin)
@@ -222,7 +224,24 @@ fn fixup_images(
     }
 }
 
+#[derive(Resource)]
+pub struct CameraScale(f32);
+
+fn set_scale_from_window(
+    mut ev: EventReader<WindowResized>,
+    mut camera_scale: ResMut<CameraScale>,
+    mut projection: Query<&mut OrthographicProjection>,
+) {
+    for e in ev.iter() {
+        camera_scale.0 = 1./(e.height / 720.) * (1. / 24.);
+
+        projection.single_mut().scale = camera_scale.0;
+    }
+}
+
 fn setup_graphics(mut commands: Commands) {
+    commands.insert_resource(CameraScale(1. / 24.));
+
     let projection = OrthographicProjection {
         scale: CAMERA_SCALE,
         far: 11.,

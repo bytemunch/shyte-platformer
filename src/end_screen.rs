@@ -140,7 +140,6 @@ fn win_subtitle(mut commands: Commands, asset_server: Res<AssetServer>, ending_i
         Endings::Normal => "normal".to_owned(),
         Endings::Genocide => "genocide".to_owned(),
         Endings::Pacifist => "pacifist".to_owned(),
-        _ => "error".to_owned(),
     };
 
     ending_type.push_str(" ending");

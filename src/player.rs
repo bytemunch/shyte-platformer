@@ -13,7 +13,7 @@ use crate::{
     kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity},
     level::{LevelEnemyCount, Trigger},
     states::{GameState, PauseState},
-    Actor, InGameItem, SystemOrderLabel, TextureHandles, CAMERA_SCALE,
+    Actor, InGameItem, SystemOrderLabel, TextureHandles, CameraScale, 
 };
 
 #[derive(Component)]
@@ -219,12 +219,13 @@ fn camera_follow_player(
     mut camera_transform: Query<&mut Transform, With<Camera2d>>,
     q_player: Query<&GlobalTransform, With<Player>>,
     windows: Res<Windows>,
+    camera_scale: Res<CameraScale>,
 ) {
     // set camera translation to player translation
     for player_transform in &q_player {
         let window = windows.get_primary().unwrap();
         camera_transform.single_mut().translation = Vec3::new(
-            player_transform.translation().x + (window.width() * 0.4 * CAMERA_SCALE),
+            player_transform.translation().x + (window.width() * 0.3 * camera_scale.0),
             0.,
             // player_transform.translation().y + 25.,
             0.,

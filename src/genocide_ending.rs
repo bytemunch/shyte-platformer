@@ -20,7 +20,7 @@ use crate::{
     player::PLAYER_RADIUS,
     states::GameState,
     util::despawn_with,
-    TextureHandles, CAMERA_SCALE,
+    CameraScale, TextureHandles,
 };
 
 back_to_enum! {
@@ -233,14 +233,15 @@ fn start(
 fn camera_zoom_in(
     mut commands: Commands,
     mut q_camera: Query<(Entity, &Transform), With<Camera2d>>,
+    camera_scale: Res<CameraScale>,
 ) {
     if let Ok((camera, transform)) = q_camera.get_single_mut() {
         let proj_scale = Tween::new(
             EaseFunction::QuadraticOut,
             Duration::from_secs_f32(ZOOM_IN_TIME),
             OrthographicProjectionScaleLens {
-                start: CAMERA_SCALE,
-                end: CAMERA_SCALE * ZOOM_FACTOR,
+                start: camera_scale.0,
+                end: camera_scale.0 * ZOOM_FACTOR,
             },
         );
         let translate = Tween::new(
@@ -347,13 +348,18 @@ fn remove_fuqheed(
     })
 }
 
-fn camera_zoom_out(mut commands: Commands, mut q_camera: Query<Entity, With<Camera2d>>) {
+fn camera_zoom_out(
+    mut commands: Commands,
+    mut q_camera: Query<Entity, With<Camera2d>>,
+
+    camera_scale: Res<CameraScale>,
+) {
     let proj_scale = Tween::new(
         EaseFunction::QuadraticOut,
         Duration::from_secs_f32(ZOOM_OUT_TIME),
         OrthographicProjectionScaleLens {
-            end: CAMERA_SCALE,
-            start: CAMERA_SCALE * ZOOM_FACTOR,
+            end: camera_scale.0,
+            start: camera_scale.0 * ZOOM_FACTOR,
         },
     );
     let translate = Tween::new(
