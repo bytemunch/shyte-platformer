@@ -5,7 +5,7 @@ use iyes_loopless::state::CurrentState;
 use crate::{
     enemy::{Enemy, EnemyMover, KillEnemyHitbox, KillPlayerHitbox},
     level::Wall,
-    player::{Player},
+    player::Player,
     states::PauseState,
     ActorDead, SystemOrderLabel,
 };
@@ -56,7 +56,11 @@ impl Plugin for KinematicPhysics {
                             .after(kinematic_gravity),
                     )
                     .with_system(move_enemies.after(kinematic_gravity))
-                    .with_system(enemy_bounce_off_wall.after(kinematic_gravity))
+                    .with_system(
+                        enemy_bounce_off_obstacle
+                            .label(SystemOrderLabel::Collisions)
+                            .after(kinematic_gravity),
+                    )
                     .with_system(
                         kinematic_set_velocity
                             .after(move_enemies)
@@ -183,14 +187,16 @@ fn enemy_player_collision(
     }
 }
 
-fn enemy_bounce_off_wall(
+fn enemy_bounce_off_obstacle(
     mut q_enemies: Query<(&KinematicCharacterControllerOutput, &mut EnemyMover)>,
 ) {
     for (output, mut mover) in &mut q_enemies.iter_mut() {
         for collision in &output.collisions {
-            mover.dir = if collision.toi.normal1.x == -1. {
+
+            let x = collision.toi.normal1.x;
+            mover.dir = if x > -1.1 && x < -0.9 {
                 -1.
-            } else if collision.toi.normal1.x == 1. {
+            } else if x < 1.1 && x > 0.9 {
                 1.
             } else {
                 mover.dir

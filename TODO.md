@@ -4,8 +4,6 @@
 
 BUG: player sticks to ceilings
 
-BUG: enemies don't bounce off eachother
-
 BUG: font spills over button graphic for resume
 
 BUG: win screen ok button text not centered
