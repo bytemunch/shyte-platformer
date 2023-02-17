@@ -17,7 +17,7 @@ use crate::{
     player::PLAYER_RADIUS,
     states::GameState,
     util::despawn_with,
-    CameraScale, TextureHandles,
+    CameraScale, TextureHandles, UiFont,
 };
 
 back_to_enum! {
@@ -323,28 +323,28 @@ fn camera_zoom_in(
     }
 }
 
-fn speech_line_1(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn speech_line_1(mut commands: Commands, ui_font: Res<UiFont>) {
     commands.spawn(dialogue_text(
         "hello im mr shyte",
         400.,
         300.,
-        asset_server.load("fonts/Chalk-Regular.ttf"),
+        ui_font.0.clone(),
         IntroCutsceneProgress::SpeechLine1 as u64,
     ));
 }
 
 fn speech_line_2(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     texture_handles: Res<TextureHandles>,
 
     mut q_enemy_face: Query<&mut Handle<Image>, With<EnemyFaceTag>>,
+    ui_font: Res<UiFont>,
 ) {
     commands.spawn(dialogue_text(
         "loll dumb name",
         410.,
         700.,
-        asset_server.load("fonts/Chalk-Regular.ttf"),
+        ui_font.0.clone(),
         IntroCutsceneProgress::SpeechLine2 as u64,
     ));
 

@@ -15,6 +15,7 @@ use crate::{
     pacifist_ending::despawn_pacifist_ending,
     states::GameState,
     util::despawn_with,
+    UiFont,
 };
 
 back_to_enum! {
@@ -122,20 +123,20 @@ fn fade_to_black(mut commands: Commands) {
         .insert(Animator::new(fade_in));
 }
 
-fn win_title(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn win_title(mut commands: Commands, ui_font: Res<UiFont>) {
     commands
         .spawn(title_text(
             "you win",
             200.,
             540.,
-            asset_server.load("fonts/Chalk-Regular.ttf"),
+            ui_font.0.clone(),
             EndScreenProgress::WinTitle as u64,
             80.,
         ))
         .insert(EndScreenTag);
 }
 
-fn win_subtitle(mut commands: Commands, asset_server: Res<AssetServer>, ending_id: Res<Ending>) {
+fn win_subtitle(mut commands: Commands, ending_id: Res<Ending>, ui_font: Res<UiFont>) {
     let mut ending_type: String = match ending_id.0 {
         Endings::Normal => "normal".to_owned(),
         Endings::Genocide => "genocide".to_owned(),
@@ -149,7 +150,7 @@ fn win_subtitle(mut commands: Commands, asset_server: Res<AssetServer>, ending_i
             ending_type,
             300.,
             540.,
-            asset_server.load("fonts/Chalk-Regular.ttf"),
+            ui_font.0.clone(),
             EndScreenProgress::WinSubtitle as u64,
             60.,
         ))
@@ -159,7 +160,7 @@ fn win_subtitle(mut commands: Commands, asset_server: Res<AssetServer>, ending_i
 #[derive(Component)]
 struct OkButton;
 
-fn ok_button(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn ok_button(mut commands: Commands, ui_font: Res<UiFont>) {
     // spawn ok button
 
     commands
@@ -183,7 +184,7 @@ fn ok_button(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "OK",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },

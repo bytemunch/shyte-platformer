@@ -20,7 +20,7 @@ use crate::{
     player::PLAYER_RADIUS,
     states::GameState,
     util::despawn_with,
-    CameraScale, TextureHandles,
+    CameraScale, TextureHandles, UiFont,
 };
 
 back_to_enum! {
@@ -261,12 +261,12 @@ fn camera_zoom_in(
     }
 }
 
-fn speech_line_1(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn speech_line_1(mut commands: Commands, ui_font: Res<UiFont>) {
     commands.spawn(dialogue_text(
         "hello im mr fuqheed",
         400.,
         700.,
-        asset_server.load("fonts/Chalk-Regular.ttf"),
+        ui_font.0.clone(),
         GenocideEndingProgress::SpeechLine1 as u64,
     ));
 }

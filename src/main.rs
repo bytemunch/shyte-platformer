@@ -84,6 +84,7 @@ fn main() {
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // setup
         .add_startup_system(load_textures)
+        .add_startup_system(setup_font)
         .add_startup_system(setup_graphics)
         .add_system_to_stage(CoreStage::PreUpdate, remove_dead_actors)
         // testing
@@ -227,13 +228,20 @@ fn fixup_images(
 #[derive(Resource)]
 pub struct CameraScale(f32);
 
+#[derive(Resource)]
+pub struct UiFont(Handle<Font>);
+
+fn setup_font(asset_server: Res<AssetServer>, mut commands: Commands) {
+    commands.insert_resource(UiFont(asset_server.load("fonts/Chalk-Regular.ttf")));
+}
+
 fn set_scale_from_window(
     mut ev: EventReader<WindowResized>,
     mut camera_scale: ResMut<CameraScale>,
     mut projection: Query<&mut OrthographicProjection>,
 ) {
     for e in ev.iter() {
-        camera_scale.0 = 1./(e.height / 720.) * (1. / 24.);
+        camera_scale.0 = 1. / (e.height / 720.) * (1. / 24.);
 
         projection.single_mut().scale = camera_scale.0;
     }

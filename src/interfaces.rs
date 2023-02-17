@@ -3,6 +3,7 @@ use std::process::exit;
 use bevy::prelude::*;
 use iyes_loopless::prelude::*;
 
+use crate::UiFont;
 use crate::states::GameState;
 use crate::states::PauseState;
 use crate::util::despawn_with;
@@ -92,14 +93,14 @@ fn menu_button(mut commands: Commands, button_query: Query<&Interaction, With<Me
     }
 }
 
-fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_menu(mut commands: Commands, ui_font: Res<UiFont>) {
     // text
     commands
         .spawn(TextBundle {
             text: Text::from_section(
                 "shyte (tm) platformer",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -145,7 +146,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "PLAY",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -173,7 +174,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     //         parent.spawn(TextBundle::from_section(
     //             "EDITOR",
     //             TextStyle {
-    //                 font: asset_server.load("fonts/Chalk-Regular.ttf"),
+    //                 font: ui_font.0.clone(),
     //                 font_size: 40.0,
     //                 color: Color::rgb(0.9, 0.9, 0.9),
     //             },
@@ -202,7 +203,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "QUIT",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -237,14 +238,14 @@ fn editor_button(mut commands: Commands, button_query: Query<&Interaction, With<
     }
 }
 
-fn setup_dead(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_dead(mut commands: Commands, ui_font: Res<UiFont>) {
     // text
     commands
         .spawn(TextBundle {
             text: Text::from_section(
                 "oop u ded",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -289,7 +290,7 @@ fn setup_dead(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "REPLAY",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -318,7 +319,7 @@ fn setup_dead(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "MENU",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -347,7 +348,7 @@ fn setup_dead(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "QUIT",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -380,14 +381,14 @@ fn replay_button(mut commands: Commands, query: Query<&Interaction, With<ReplayB
     }
 }
 
-fn setup_pause_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_pause_menu(mut commands: Commands, ui_font: Res<UiFont>) {
     // text
     commands
         .spawn(TextBundle {
             text: Text::from_section(
                 "pausa",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -434,7 +435,7 @@ fn setup_pause_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "RESUME",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -463,7 +464,7 @@ fn setup_pause_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "MENU",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -492,7 +493,7 @@ fn setup_pause_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "RESET",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
@@ -521,7 +522,7 @@ fn setup_pause_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn(TextBundle::from_section(
                 "QUIT",
                 TextStyle {
-                    font: asset_server.load("fonts/Chalk-Regular.ttf"),
+                    font: ui_font.0.clone(),
                     font_size: 40.0,
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },

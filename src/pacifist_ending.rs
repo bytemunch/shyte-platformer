@@ -17,7 +17,7 @@ use crate::{
     player::PLAYER_RADIUS,
     states::GameState,
     util::despawn_with,
-    CameraScale, TextureHandles,
+    CameraScale, TextureHandles, UiFont,
 };
 
 back_to_enum! {
@@ -268,29 +268,29 @@ fn camera_zoom_in(
     }
 }
 
-fn speech_line_1(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn speech_line_1(mut commands: Commands, ui_font: Res<UiFont>) {
     commands.spawn(dialogue_text(
         "hello im mr fuqheed",
         400.,
         700.,
-        asset_server.load("fonts/Chalk-Regular.ttf"),
+        ui_font.0.clone(),
         PacifistEndingProgress::SpeechLine1 as u64,
     ));
 }
 
 fn speech_line_2(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     texture_handles: Res<TextureHandles>,
 
     mut q_player_face: Query<&mut Handle<Image>, With<PlayerFaceTag>>,
     mut q_player_body: Query<Entity, With<PlayerBodyTag>>,
+    ui_font: Res<UiFont>,
 ) {
     commands.spawn(dialogue_text(
         "i get it man im mr shyte",
         410.,
         300.,
-        asset_server.load("fonts/Chalk-Regular.ttf"),
+        ui_font.0.clone(),
         PacifistEndingProgress::SpeechLine2 as u64,
     ));
 
@@ -316,22 +316,22 @@ fn speech_line_2(
     }
 }
 
-fn speech_line_3(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn speech_line_3(mut commands: Commands, ui_font: Res<UiFont>) {
     commands.spawn(dialogue_text(
         "coffee?",
         400.,
         300.,
-        asset_server.load("fonts/Chalk-Regular.ttf"),
+        ui_font.0.clone(),
         PacifistEndingProgress::SpeechLine3 as u64,
     ));
 }
 
-fn speech_line_4(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn speech_line_4(mut commands: Commands, ui_font: Res<UiFont>) {
     commands.spawn(dialogue_text(
         "sure",
         400.,
         700.,
-        asset_server.load("fonts/Chalk-Regular.ttf"),
+        ui_font.0.clone(),
         PacifistEndingProgress::SpeechLine4 as u64,
     ));
 }
