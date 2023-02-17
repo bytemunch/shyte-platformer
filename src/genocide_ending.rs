@@ -261,13 +261,21 @@ fn camera_zoom_in(
     }
 }
 
-fn speech_line_1(mut commands: Commands, ui_font: Res<UiFont>) {
+fn speech_line_1(
+    mut commands: Commands,
+    ui_font: Res<UiFont>,
+    q_fuqheed_transform: Query<&Transform, With<FuqheedTag>>,
+    camera_scale: Res<CameraScale>,
+) {
+    let transform = q_fuqheed_transform.single();
+
     commands.spawn(dialogue_text(
         "hello im mr fuqheed",
-        400.,
-        700.,
+        transform.translation.x,
+        transform.translation.y,
         ui_font.0.clone(),
         GenocideEndingProgress::SpeechLine1 as u64,
+        camera_scale.0,
     ));
 }
 

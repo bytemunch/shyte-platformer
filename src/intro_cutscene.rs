@@ -39,6 +39,9 @@ struct IntroCutsceneTag;
 struct PlayerTag;
 
 #[derive(Component)]
+struct EnemyTag;
+
+#[derive(Component)]
 struct PlayerBodyTag;
 
 #[derive(Component)]
@@ -169,6 +172,7 @@ fn start(
             ..default()
         })
         .insert(IntroCutsceneTag)
+        .insert(EnemyTag)
         .with_children(|cb| {
             cb.spawn(SpriteBundle {
                 texture: texture_handles.char_outline.clone().unwrap(),
@@ -323,13 +327,20 @@ fn camera_zoom_in(
     }
 }
 
-fn speech_line_1(mut commands: Commands, ui_font: Res<UiFont>) {
+fn speech_line_1(
+    mut commands: Commands,
+    ui_font: Res<UiFont>,
+    q_player_transform: Query<&Transform, With<PlayerTag>>,
+    camera_scale: Res<CameraScale>,
+) {
+    let t = q_player_transform.single();
     commands.spawn(dialogue_text(
         "hello im mr shyte",
-        400.,
-        300.,
+        t.translation.x,
+        t.translation.y,
         ui_font.0.clone(),
         IntroCutsceneProgress::SpeechLine1 as u64,
+        camera_scale.0,
     ));
 }
 
@@ -339,13 +350,19 @@ fn speech_line_2(
 
     mut q_enemy_face: Query<&mut Handle<Image>, With<EnemyFaceTag>>,
     ui_font: Res<UiFont>,
+
+    q_enemy_transform: Query<&Transform, With<EnemyTag>>,
+    camera_scale: Res<CameraScale>,
 ) {
+    let t = q_enemy_transform.single();
+
     commands.spawn(dialogue_text(
         "loll dumb name",
-        410.,
-        700.,
+        t.translation.x,
+        t.translation.y,
         ui_font.0.clone(),
         IntroCutsceneProgress::SpeechLine2 as u64,
+        camera_scale.0,
     ));
 
     // change enemy expression

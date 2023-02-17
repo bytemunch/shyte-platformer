@@ -2,21 +2,23 @@
 
 ## BUGS
 
-BUG: player sticks to ceilings
+BUG: CUTSCENE: intro cutscene does not frame correctly at different aspect ratios
 
-BUG: font spills over button graphic for resume
+BUG: GAME: player sticks to ceilings
 
-BUG: win screen ok button text not centered
+BUG: UI: font spills over button graphic for resume
 
-BUG: cutscene text appears at wrong place at different window sizes
+BUG: UI: win screen ok button text not centered
 
-BUG: win screen text appears at wrong place at different window sizes. use flexbox better
+BUG: UI: win screen text appears at wrong place at different window sizes. use flexbox better
 
-BUG: returning to menu from end screen breaks background scaling
+BUG: DONTCARE: returning to menu from end screen breaks background scaling temporarily
+
+BUG: DONTCARE: resizing while cutscene is active breaks background
 
 ## TODOS
 
-TODO: use Text2dBundle for dialogue
+bugs ^.^
 
 ## NOTES
 

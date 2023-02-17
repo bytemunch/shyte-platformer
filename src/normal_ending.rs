@@ -271,13 +271,21 @@ fn camera_zoom_in(
     }
 }
 
-fn speech_line_1(mut commands: Commands, ui_font: Res<UiFont>) {
+fn speech_line_1(
+    mut commands: Commands,
+    ui_font: Res<UiFont>,
+    q_fuqheed_transform: Query<&Transform, With<FuqheedTag>>,
+    camera_scale: Res<CameraScale>,
+) {
+    let transform = q_fuqheed_transform.single();
+
     commands.spawn(dialogue_text(
         "hello im mr fuqheed",
-        400.,
-        700.,
+        transform.translation.x,
+        transform.translation.y,
         ui_font.0.clone(),
         NormalEndingProgress::SpeechLine1 as u64,
+        camera_scale.0,
     ));
 }
 
@@ -288,13 +296,20 @@ fn speech_line_2(
     mut q_player_face: Query<&mut Handle<Image>, With<PlayerFaceTag>>,
     mut q_player_body: Query<Entity, With<PlayerBodyTag>>,
     ui_font: Res<UiFont>,
+
+    q_player_transform: Query<&Transform, With<PlayerTag>>,
+
+    camera_scale: Res<CameraScale>,
 ) {
+    let t = q_player_transform.single();
+
     commands.spawn(dialogue_text(
         "loll dumb name",
-        410.,
-        300.,
+        t.translation.x,
+        t.translation.y,
         ui_font.0.clone(),
         NormalEndingProgress::SpeechLine2 as u64,
+        camera_scale.0,
     ));
 
     // change player expression

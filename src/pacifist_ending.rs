@@ -268,13 +268,21 @@ fn camera_zoom_in(
     }
 }
 
-fn speech_line_1(mut commands: Commands, ui_font: Res<UiFont>) {
+fn speech_line_1(
+    mut commands: Commands,
+    ui_font: Res<UiFont>,
+    q_fuqheed_transform: Query<&Transform, With<FuqheedTag>>,
+    camera_scale: Res<CameraScale>,
+) {
+    let transform = q_fuqheed_transform.single();
+
     commands.spawn(dialogue_text(
         "hello im mr fuqheed",
-        400.,
-        700.,
+        transform.translation.x,
+        transform.translation.y,
         ui_font.0.clone(),
         PacifistEndingProgress::SpeechLine1 as u64,
+        camera_scale.0,
     ));
 }
 
@@ -285,13 +293,17 @@ fn speech_line_2(
     mut q_player_face: Query<&mut Handle<Image>, With<PlayerFaceTag>>,
     mut q_player_body: Query<Entity, With<PlayerBodyTag>>,
     ui_font: Res<UiFont>,
+    q_player_transform: Query<&Transform, With<PlayerTag>>,
+    camera_scale: Res<CameraScale>,
 ) {
+    let t = q_player_transform.single();
     commands.spawn(dialogue_text(
         "i get it man im mr shyte",
-        410.,
-        300.,
+        t.translation.x,
+        t.translation.y,
         ui_font.0.clone(),
         PacifistEndingProgress::SpeechLine2 as u64,
+        camera_scale.0,
     ));
 
     // player calms down
@@ -316,23 +328,37 @@ fn speech_line_2(
     }
 }
 
-fn speech_line_3(mut commands: Commands, ui_font: Res<UiFont>) {
+fn speech_line_3(
+    mut commands: Commands,
+    ui_font: Res<UiFont>,
+    q_player_transform: Query<&Transform, With<PlayerTag>>,
+    camera_scale: Res<CameraScale>,
+) {
+    let t = q_player_transform.single();
     commands.spawn(dialogue_text(
         "coffee?",
-        400.,
-        300.,
+        t.translation.x,
+        t.translation.y,
         ui_font.0.clone(),
         PacifistEndingProgress::SpeechLine3 as u64,
+        camera_scale.0,
     ));
 }
 
-fn speech_line_4(mut commands: Commands, ui_font: Res<UiFont>) {
+fn speech_line_4(
+    mut commands: Commands,
+    ui_font: Res<UiFont>,
+    q_fuqheed_transform: Query<&Transform, With<FuqheedTag>>,
+    camera_scale: Res<CameraScale>,
+) {
+    let transform = q_fuqheed_transform.single();
     commands.spawn(dialogue_text(
         "sure",
-        400.,
-        700.,
+        transform.translation.x,
+        transform.translation.y,
         ui_font.0.clone(),
         PacifistEndingProgress::SpeechLine4 as u64,
+        camera_scale.0,
     ));
 }
 

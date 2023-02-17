@@ -93,11 +93,12 @@ const TALK_DELAY: f32 = 0.7;
 // todo there's gonna be a better way of doing this, i know it
 pub fn dialogue_text(
     value: impl Into<String>,
-    top: f32,
-    left: f32,
+    pos_x: f32,
+    pos_y: f32,
     font: Handle<Font>,
     user_data: u64,
-) -> (TextBundle, Animator<Text>) {
+    scale: f32,
+) -> (Text2dBundle, Animator<Text>) {
     let speech_in = Tween::new(
         EaseFunction::QuadraticOut,
         Duration::from_secs_f32(0.3),
@@ -124,25 +125,21 @@ pub fn dialogue_text(
     let speech_seq = speech_in.then(speech_hold).then(speech_out);
 
     (
-        TextBundle {
-            z_index: ZIndex::Global(10),
-            style: Style {
-                position_type: PositionType::Absolute,
-                position: UiRect {
-                    top: Val::Px(top),
-                    left: Val::Px(left),
-                    ..default()
-                },
-                ..default()
-            },
+        Text2dBundle {
             text: Text::from_section(
                 value,
                 TextStyle {
                     font,
-                    font_size: 40.0,
+                    font_size: 40.,
                     color: Color::rgba(0.9, 0.9, 0.9, 0.),
                 },
-            ),
+            )
+            .with_alignment(TextAlignment::CENTER),
+            transform: Transform::from_xyz(pos_x, pos_y + 2., 10.).with_scale(Vec3::new(
+                scale / 2.,
+                scale / 2.,
+                1.,
+            )),
             ..default()
         },
         Animator::new(speech_seq),
