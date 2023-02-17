@@ -232,7 +232,7 @@ pub struct CameraScale(f32);
 pub struct UiFont(Handle<Font>);
 
 fn setup_font(asset_server: Res<AssetServer>, mut commands: Commands) {
-    commands.insert_resource(UiFont(asset_server.load("fonts/Chalk-Regular.ttf")));
+    commands.insert_resource(UiFont(asset_server.load("fonts/kindergarten.ttf")));
 }
 
 fn set_scale_from_window(

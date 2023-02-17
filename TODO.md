@@ -18,8 +18,6 @@ BUG: returning to menu from end screen breaks background scaling
 
 TODO: move respect meter
 
-TODO: better font
-
 TODO: use Text2dBundle for dialogue
 
 ## NOTES
