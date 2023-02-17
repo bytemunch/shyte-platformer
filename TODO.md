@@ -2,8 +2,6 @@
 
 ## BUGS
 
-BUG: CUTSCENE: intro cutscene does not frame correctly at different aspect ratios
-
 BUG: GAME: player sticks to ceilings
 
 BUG: UI: font spills over button graphic for resume

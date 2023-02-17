@@ -313,7 +313,7 @@ fn camera_zoom_in(
         Duration::from_secs_f32(ZOOM_IN_TIME),
         TransformPositionLens {
             start: Vec3::new(20., 0., 0.),
-            end: Vec3::new(3., ZOOM_Y_OFFSET, 0.),
+            end: Vec3::new(5., ZOOM_Y_OFFSET, 0.),
         },
     )
     .with_completed_event(IntroCutsceneProgress::CameraZoomIn as u64);
