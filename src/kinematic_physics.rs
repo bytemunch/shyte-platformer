@@ -66,7 +66,7 @@ impl Plugin for KinematicPhysics {
                             .after(move_enemies)
                             .after(kinematic_gravity)
                             .after(SystemOrderLabel::Collisions)
-                            .after(kinematic_apply_friction), // .after(collision_test),
+                            .after(kinematic_apply_friction),
                     )
                     .with_system(
                         player_max_speed
@@ -83,6 +83,7 @@ impl Plugin for KinematicPhysics {
                             .before(kinematic_apply_velocity),
                     )
                     .with_system(player_wall_raycast.before(kinematic_set_velocity))
+                    .with_system(player_roof_raycast.before(kinematic_set_velocity))
                     .with_system(kinematic_apply_velocity.after(kinematic_set_velocity))
                     .after(SystemOrderLabel::Input),
             );
@@ -140,6 +141,39 @@ fn player_wall_raycast(
     }
 }
 
+fn player_roof_raycast(
+    rapier_context: Res<RapierContext>,
+    mut q_player: Query<(Entity, &Transform, &mut CCVelocity, &mut CCAcceleration), With<Player>>,
+    q_walls: Query<Entity, With<Wall>>,
+) {
+    if let Ok((player, player_transform, mut vel, mut acc)) = q_player.get_single_mut() {
+        let max_toi = 1.0;
+        let ray_origin = Vec2::new(
+            player_transform.translation.x,
+            player_transform.translation.y,
+        );
+        let ray_dir = Vec2::new(0.0, 1.0);
+        let solid = true;
+        let filter = QueryFilter::default().exclude_rigid_body(player);
+
+        let callback = |entity, intersection: RayIntersection| {
+            if let Ok(_wall) = q_walls.get(entity) {
+                let hit_normal = intersection.normal;
+
+                if (vel.0.y > 0. || acc.0.y > 0.) && hit_normal.y < 0. {
+                    vel.0.y = 0.;
+                    acc.0.y = 0.;
+                }
+            }
+
+            true
+        };
+
+        rapier_context
+            .intersections_with_ray(ray_origin, ray_dir, max_toi, solid, filter, callback);
+    }
+}
+
 /* Read the character controller collisions stored in the character controller’s output. */
 fn player_kill_enemy(
     mut commands: Commands,
@@ -192,7 +226,6 @@ fn enemy_bounce_off_obstacle(
 ) {
     for (output, mut mover) in &mut q_enemies.iter_mut() {
         for collision in &output.collisions {
-
             let x = collision.toi.normal1.x;
             mover.dir = if x > -1.1 && x < -0.9 {
                 -1.

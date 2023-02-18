@@ -2,15 +2,11 @@
 
 ## BUGS
 
-BUG: GAME: player sticks to ceilings
-
 BUG: DONTCARE: returning to menu from end screen breaks background scaling temporarily
 
 BUG: DONTCARE: resizing while cutscene is active breaks background
 
 ## TODOS
-
-bugs ^.^
 
 SOUND
 
