@@ -8,7 +8,7 @@ use crate::states::GameState;
 use crate::states::PauseState;
 use crate::util::despawn_with;
 
-// TODO split each interface out into seperate files, keep shared components & systems here
+// TODO a big ol refac here
 
 #[derive(Component)]
 struct MenuItem;
@@ -106,17 +106,17 @@ fn setup_menu(mut commands: Commands, ui_font: Res<UiFont>) {
                 },
             ),
             style: Style {
-                size: Size::new(Val::Px(1500.0), Val::Px(65.0)),
+                size: Size::new(Val::Percent(100.0), Val::Px(65.0)),
                 // center button
                 margin: UiRect::all(Val::Auto),
                 // horizontally center child text
                 justify_content: JustifyContent::Center,
                 // vertically center child text
-                align_items: AlignItems::FlexStart,
+                align_items: AlignItems::Center,
 
                 position: UiRect {
-                    left: Val::Percent(35.),
-                    top: Val::Px(100.),
+                    left: Val::Px(50.),
+                    top: Val::Px(50.),
                     ..default()
                 },
 

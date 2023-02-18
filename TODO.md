@@ -4,8 +4,6 @@
 
 BUG: GAME: player sticks to ceilings
 
-BUG: game title not centered
-
 BUG: DONTCARE: returning to menu from end screen breaks background scaling temporarily
 
 BUG: DONTCARE: resizing while cutscene is active breaks background
@@ -73,3 +71,5 @@ REFAC: level vec for platforms and enemies, iterate and spawn instead of writing
 REFAC: background
 
 REFAC: respect meter should resize with window
+
+REFAC: game title not centered
