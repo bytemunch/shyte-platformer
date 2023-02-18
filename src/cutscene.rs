@@ -148,8 +148,6 @@ pub fn dialogue_text(
 
 pub fn title_text(
     value: impl Into<String>,
-    top: f32,
-    left: f32,
     font: Handle<Font>,
     user_data: u64,
     font_size: f32,
@@ -169,15 +167,6 @@ pub fn title_text(
     (
         TextBundle {
             z_index: ZIndex::Global(10),
-            style: Style {
-                position_type: PositionType::Absolute,
-                position: UiRect {
-                    top: Val::Px(top),
-                    left: Val::Px(left),
-                    ..default()
-                },
-                ..default()
-            },
             text: Text::from_section(
                 value,
                 TextStyle {
@@ -187,7 +176,15 @@ pub fn title_text(
                 },
             ),
             ..default()
-        },
+        }
+        .with_style(Style {
+            margin: UiRect {
+                top: Val::Px(20.),
+                bottom: Val::Px(20.),
+                ..default()
+            },
+            ..default()
+        }),
         Animator::new(title_in),
     )
 }

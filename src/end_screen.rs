@@ -45,6 +45,9 @@ struct EndScreenTag;
 #[derive(Component)]
 struct BigBoxTag;
 
+#[derive(Component)]
+struct RootNodeTag;
+
 pub struct EndScreenPlugin;
 
 impl Plugin for EndScreenPlugin {
@@ -121,22 +124,52 @@ fn fade_to_black(mut commands: Commands) {
         })
         .insert(EndScreenTag)
         .insert(Animator::new(fade_in));
+
+    // root node
+    commands
+        .spawn(NodeBundle {
+            style: Style {
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::Center,
+                flex_wrap: FlexWrap::Wrap,
+                flex_direction: FlexDirection::Column,
+                position_type: PositionType::Absolute,
+                position: UiRect {
+                    top: Val::Px(0.),
+                    bottom: Val::Px(0.),
+                    left: Val::Px(0.),
+                    right: Val::Px(0.),
+                },
+                ..default()
+            },
+            ..default()
+        })
+        .insert(EndScreenTag)
+        .insert(RootNodeTag);
 }
 
-fn win_title(mut commands: Commands, ui_font: Res<UiFont>) {
-    commands
-        .spawn(title_text(
+fn win_title(
+    mut commands: Commands,
+    ui_font: Res<UiFont>,
+    q_root_node: Query<Entity, With<RootNodeTag>>,
+) {
+    commands.entity(q_root_node.single()).add_children(|cb| {
+        cb.spawn(title_text(
             "you win",
-            200.,
-            540.,
             ui_font.0.clone(),
             EndScreenProgress::WinTitle as u64,
             80.,
         ))
         .insert(EndScreenTag);
+    });
 }
 
-fn win_subtitle(mut commands: Commands, ending_id: Res<Ending>, ui_font: Res<UiFont>) {
+fn win_subtitle(
+    mut commands: Commands,
+    ending_id: Res<Ending>,
+    ui_font: Res<UiFont>,
+    q_root_node: Query<Entity, With<RootNodeTag>>,
+) {
     let mut ending_type: String = match ending_id.0 {
         Endings::Normal => "normal".to_owned(),
         Endings::Genocide => "genocide".to_owned(),
@@ -144,37 +177,34 @@ fn win_subtitle(mut commands: Commands, ending_id: Res<Ending>, ui_font: Res<UiF
     };
 
     ending_type.push_str(" ending");
-
-    commands
-        .spawn(title_text(
+    commands.entity(q_root_node.single()).add_children(|cb| {
+        cb.spawn(title_text(
             ending_type,
-            300.,
-            540.,
             ui_font.0.clone(),
             EndScreenProgress::WinSubtitle as u64,
             60.,
         ))
         .insert(EndScreenTag);
+    });
 }
 
 #[derive(Component)]
 struct OkButton;
 
-fn ok_button(mut commands: Commands, ui_font: Res<UiFont>) {
+fn ok_button(
+    mut commands: Commands,
+    ui_font: Res<UiFont>,
+    q_root_node: Query<Entity, With<RootNodeTag>>,
+) {
     // spawn ok button
-
-    commands
+    commands.entity(q_root_node.single()).add_children(|cb| {
+        cb
         .spawn(ButtonBundle {
             style: Style {
                 size: Size::new(Val::Px(150.0), Val::Px(65.0)),
-                position_type: PositionType::Absolute,
-                position: UiRect {
-                    left: Val::Px(540.),
-                    top: Val::Px(540.),
-                    ..default()
-                },
                 justify_content: JustifyContent::Center,
-                align_items: AlignItems::FlexStart,
+                align_items: AlignItems::Center,
+                margin: UiRect::top(Val::Px(20.)),
                 ..default()
             },
             background_color: Color::RED.into(),
@@ -198,6 +228,7 @@ fn ok_button(mut commands: Commands, ui_font: Res<UiFont>) {
         //     TODO transparency tween
         // )))
         ;
+    });
 }
 
 fn ok_button_pressed(mut commands: Commands, query: Query<&Interaction, With<OkButton>>) {

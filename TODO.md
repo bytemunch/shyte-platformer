@@ -4,11 +4,7 @@
 
 BUG: GAME: player sticks to ceilings
 
-BUG: UI: font spills over button graphic for resume
-
-BUG: UI: win screen ok button text not centered
-
-BUG: UI: win screen text appears at wrong place at different window sizes. use flexbox better
+BUG: game title not centered
 
 BUG: DONTCARE: returning to menu from end screen breaks background scaling temporarily
 
@@ -17,6 +13,8 @@ BUG: DONTCARE: resizing while cutscene is active breaks background
 ## TODOS
 
 bugs ^.^
+
+SOUND
 
 ## NOTES
 
