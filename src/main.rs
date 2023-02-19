@@ -16,7 +16,8 @@ mod states;
 mod util;
 
 use background::BackgroundPlugin;
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+use bevy::audio::AudioSink;
+// use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::render::render_resource::{AddressMode, SamplerDescriptor};
 use bevy::render::texture::ImageSampler;
@@ -80,7 +81,11 @@ pub struct SoundCollection {
     angry: Handle<AudioSource>,
     land: Handle<AudioSource>,
     win: Handle<AudioSource>,
+    bgm: Handle<AudioSource>,
 }
+
+#[derive(Resource)]
+pub struct BackgroundMusic(pub Handle<AudioSink>);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemLabel)]
 pub enum SystemOrderLabel {
@@ -92,8 +97,8 @@ pub enum SystemOrderLabel {
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(LogDiagnosticsPlugin::default())
-        .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        // .add_plugin(LogDiagnosticsPlugin::default())
+        // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // setup
         .add_startup_system(load_textures)
         .add_startup_system(load_sounds)
@@ -124,7 +129,7 @@ fn main() {
         .add_plugin(ParticleSystemPlugin)
         // physics
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
-        .add_plugin(RapierDebugRenderPlugin::default())
+        // .add_plugin(RapierDebugRenderPlugin::default())
         .run();
 }
 
@@ -172,6 +177,7 @@ fn load_sounds(mut commands: Commands, asset_server: Res<AssetServer>) {
         angry: asset_server.load("sounds/angry.ogg"),
         land: asset_server.load("sounds/land.ogg"),
         win: asset_server.load("sounds/win.ogg"),
+        bgm: asset_server.load("sounds/bgm.ogg"),
     });
 }
 

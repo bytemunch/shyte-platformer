@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
+use bevy::{audio::AudioSink, prelude::*};
 use bevy_tweening::{
     lens::{SpriteColorLens, TransformPositionLens},
     Animator, EaseFunction, Tween, TweenCompleted,
@@ -17,7 +17,7 @@ use crate::{
     player::PLAYER_RADIUS,
     states::GameState,
     util::despawn_with,
-    CameraScale, SoundCollection, TextureHandles, UiFont,
+    CameraScale, SoundCollection, TextureHandles, UiFont, BackgroundMusic,
 };
 
 back_to_enum! {
@@ -108,7 +108,21 @@ fn start(
     mut materials: ResMut<Assets<ColorMaterial>>,
 
     mut ev_w: EventWriter<TweenCompleted>,
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
+
+    audio_sinks: ResMut<Assets<AudioSink>>,
 ) {
+    // TODO tween volume in
+    let weak_bgm = audio.play_with_settings(
+        sound_collection.bgm.clone(),
+        PlaybackSettings::LOOP.with_volume(0.7),
+    );
+
+    let bgm = audio_sinks.get_handle(weak_bgm);
+
+    commands.insert_resource(BackgroundMusic(bgm));
+
     let sprite_size = Some(Vec2::new(PLAYER_RADIUS * 2., PLAYER_RADIUS * 2.));
 
     // player

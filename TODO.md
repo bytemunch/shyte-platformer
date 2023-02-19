@@ -8,12 +8,12 @@ BUG: DONTCARE: resizing while cutscene is active breaks background
 
 ## TODOS
 
+TODO: SFX & BGM mute buttons
 
 ## SOUNDS
 
 laughing
 dialogue
-bgm
 
 ## NOTES
 
@@ -72,3 +72,5 @@ REFAC: background
 REFAC: respect meter should resize with window
 
 REFAC: game title not centered
+
+REFAC: audio systems seperated from where they're jammed in currently. Events based audio?

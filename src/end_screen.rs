@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
+use bevy::{audio::AudioSink, prelude::*};
 use bevy_tweening::{Animator, EaseFunction, Tween, TweenCompleted};
 use iyes_loopless::{
     prelude::{AppLooplessStateExt, IntoConditionalSystem},
@@ -15,7 +15,7 @@ use crate::{
     pacifist_ending::despawn_pacifist_ending,
     states::GameState,
     util::despawn_with,
-    SoundCollection, UiFont,
+    SoundCollection, UiFont, BackgroundMusic,
 };
 
 back_to_enum! {
@@ -55,6 +55,7 @@ impl Plugin for EndScreenPlugin {
         app.add_loopless_state(EndScreenProgress::Start)
             .add_enter_system(GameState::EndScreen, fade_to_black)
             .add_enter_system(EndScreenProgress::WinTitle, win_title)
+            .add_enter_system(EndScreenProgress::WinTitle, mute_bgm)
             .add_enter_system(EndScreenProgress::WinSubtitle, win_subtitle)
             .add_enter_system(EndScreenProgress::OkButton, ok_button)
             .add_exit_system(GameState::EndScreen, despawn_end_screen)
@@ -146,6 +147,12 @@ fn fade_to_black(mut commands: Commands) {
         })
         .insert(EndScreenTag)
         .insert(RootNodeTag);
+}
+
+pub fn mute_bgm(h_bgm: Res<BackgroundMusic>, audio_sinks: Res<Assets<AudioSink>>) {
+    if let Some(bgm) = audio_sinks.get(&h_bgm.0) {
+        bgm.stop();
+    }
 }
 
 fn win_title(

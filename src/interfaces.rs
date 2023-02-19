@@ -3,6 +3,8 @@ use std::process::exit;
 use bevy::prelude::*;
 use iyes_loopless::prelude::*;
 
+use crate::BackgroundMusic;
+use crate::end_screen::mute_bgm;
 use crate::states::GameState;
 use crate::states::PauseState;
 use crate::util::despawn_with;
@@ -46,6 +48,7 @@ impl Plugin for UserInterfacesPlugin {
         app
             // main menu transitions
             .add_enter_system(GameState::MainMenu, setup_menu)
+            .add_enter_system(GameState::MainMenu, mute_bgm.run_if_resource_exists::<BackgroundMusic>())
             .add_exit_system(GameState::MainMenu, despawn_menu)
             // dead transitions
             .add_enter_system(GameState::Dead, setup_dead)
