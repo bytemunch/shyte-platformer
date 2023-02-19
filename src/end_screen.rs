@@ -10,12 +10,12 @@ use iyes_loopless::{
 use crate::{
     back_to_enum,
     cutscene::{title_text, BackgroundColorLens},
-    genocide_ending::despawn_genocide_ending,
-    normal_ending::despawn_normal_ending,
-    pacifist_ending::despawn_pacifist_ending,
+    genocide_ending::GenocideEndingTag,
+    normal_ending::NormalEndingTag,
+    pacifist_ending::PacifistEndingTag,
     states::GameState,
     util::despawn_with,
-    SoundCollection, UiFont, BackgroundMusic,
+    BackgroundMusic, SoundCollection, UiFont,
 };
 
 back_to_enum! {
@@ -58,10 +58,10 @@ impl Plugin for EndScreenPlugin {
             .add_enter_system(EndScreenProgress::WinTitle, mute_bgm)
             .add_enter_system(EndScreenProgress::WinSubtitle, win_subtitle)
             .add_enter_system(EndScreenProgress::OkButton, ok_button)
-            .add_exit_system(GameState::EndScreen, despawn_end_screen)
-            .add_exit_system(GameState::EndScreen, despawn_normal_ending)
-            .add_exit_system(GameState::EndScreen, despawn_genocide_ending)
-            .add_exit_system(GameState::EndScreen, despawn_pacifist_ending)
+            .add_exit_system(GameState::EndScreen, despawn_with::<EndScreenTag>)
+            .add_exit_system(GameState::EndScreen, despawn_with::<NormalEndingTag>)
+            .add_exit_system(GameState::EndScreen, despawn_with::<GenocideEndingTag>)
+            .add_exit_system(GameState::EndScreen, despawn_with::<PacifistEndingTag>)
             .add_system(ok_button_pressed.run_in_state(GameState::EndScreen))
             .add_system(cutscene_controller.run_in_state(GameState::EndScreen));
     }
@@ -260,8 +260,4 @@ fn ok_button_pressed(
             Interaction::None => {}
         }
     }
-}
-
-fn despawn_end_screen(commands: Commands, q: Query<Entity, With<EndScreenTag>>) {
-    despawn_with(commands, q)
 }

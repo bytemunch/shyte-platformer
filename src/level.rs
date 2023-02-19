@@ -19,7 +19,7 @@ impl Plugin for LevelPlugin {
             // ingame transitions
             .add_enter_system(GameState::InGame, setup_level)
             .add_enter_system(GameState::InGame, setup_ingame_ui.after(setup_level))
-            .add_exit_system(GameState::InGame, despawn_level)
+            .add_exit_system(GameState::InGame, despawn_with::<InGameItem>)
             .add_system(
                 actor_fall_out
                     .run_in_state(GameState::InGame)
@@ -579,10 +579,6 @@ fn setup_level(
 
     // enter level enemy count
     commands.insert_resource(LevelEnemyCount(13));
-}
-
-fn despawn_level(commands: Commands, query: Query<Entity, With<InGameItem>>) {
-    despawn_with(commands, query)
 }
 
 fn actor_fall_out(

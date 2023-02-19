@@ -16,7 +16,6 @@ use crate::{
     level::{create_box, FLOOR_0, FLOOR_0_BOTTOM},
     player::PLAYER_RADIUS,
     states::GameState,
-    util::despawn_with,
     CameraScale, TextureHandles, UiFont,
 };
 
@@ -437,8 +436,4 @@ fn camera_zoom_out(
             .insert(Animator::new(proj_scale))
             .insert(Animator::new(dummy_delay));
     }
-}
-
-pub fn despawn_pacifist_ending(commands: Commands, q: Query<Entity, With<PacifistEndingTag>>) {
-    despawn_with(commands, q)
 }

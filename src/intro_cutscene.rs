@@ -61,7 +61,7 @@ impl Plugin for IntroCutscenePlugin {
             .add_enter_system(IntroCutsceneProgress::SpeechLine2, speech_line_2)
             .add_enter_system(IntroCutsceneProgress::ActorAnimation, actor_animation)
             .add_enter_system(IntroCutsceneProgress::CameraZoomOut, camera_zoom_out)
-            .add_exit_system(GameState::IntroCutscene, despawn_intro_cutscene)
+            .add_exit_system(GameState::IntroCutscene, despawn_with::<IntroCutsceneTag>)
             .add_system(cutscene_controller.run_in_state(GameState::IntroCutscene));
     }
 }
@@ -452,8 +452,4 @@ fn camera_zoom_out(
             .insert(Animator::new(translate))
             .insert(Animator::new(proj_scale));
     }
-}
-
-fn despawn_intro_cutscene(commands: Commands, q: Query<Entity, With<IntroCutsceneTag>>) {
-    despawn_with(commands, q)
 }

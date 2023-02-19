@@ -3,11 +3,11 @@ use std::process::exit;
 use bevy::prelude::*;
 use iyes_loopless::prelude::*;
 
-use crate::BackgroundMusic;
 use crate::end_screen::mute_bgm;
 use crate::states::GameState;
 use crate::states::PauseState;
 use crate::util::despawn_with;
+use crate::BackgroundMusic;
 use crate::SoundCollection;
 use crate::UiFont;
 
@@ -48,14 +48,17 @@ impl Plugin for UserInterfacesPlugin {
         app
             // main menu transitions
             .add_enter_system(GameState::MainMenu, setup_menu)
-            .add_enter_system(GameState::MainMenu, mute_bgm.run_if_resource_exists::<BackgroundMusic>())
-            .add_exit_system(GameState::MainMenu, despawn_menu)
+            .add_enter_system(
+                GameState::MainMenu,
+                mute_bgm.run_if_resource_exists::<BackgroundMusic>(),
+            )
+            .add_exit_system(GameState::MainMenu, despawn_with::<MenuItem>)
             // dead transitions
             .add_enter_system(GameState::Dead, setup_dead)
-            .add_exit_system(GameState::Dead, despawn_dead)
+            .add_exit_system(GameState::Dead, despawn_with::<DeadItem>)
             // pause transitions
             .add_enter_system(PauseState::Paused, setup_pause_menu)
-            .add_exit_system(PauseState::Paused, despawn_pause_menu)
+            .add_exit_system(PauseState::Paused, despawn_with::<PauseItem>)
             // button systems
             .add_system(quit_button)
             .add_system(replay_button)
@@ -64,10 +67,6 @@ impl Plugin for UserInterfacesPlugin {
             .add_system(pause_resume_button.run_in_state(PauseState::Paused))
             .add_system(play_button.run_in_state(GameState::MainMenu));
     }
-}
-
-fn despawn_menu(commands: Commands, query: Query<Entity, With<MenuItem>>) {
-    despawn_with(commands, query)
 }
 
 fn pause_resume_button(
@@ -569,12 +568,4 @@ fn setup_pause_menu(mut commands: Commands, ui_font: Res<UiFont>) {
         })
         .insert(PauseItem)
         .insert(QuitButton);
-}
-
-fn despawn_pause_menu(commands: Commands, q: Query<Entity, With<PauseItem>>) {
-    despawn_with(commands, q);
-}
-
-fn despawn_dead(commands: Commands, q: Query<Entity, With<DeadItem>>) {
-    despawn_with(commands, q);
 }

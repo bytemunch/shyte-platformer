@@ -104,7 +104,7 @@ fn main() {
         .add_startup_system(load_sounds)
         .add_startup_system(setup_font)
         .add_startup_system(setup_graphics)
-        .add_system_to_stage(CoreStage::PreUpdate, remove_dead_actors)
+        .add_system_to_stage(CoreStage::PreUpdate, despawn_with::<ActorDead>)
         // testing
         .add_system(fixup_images)
         .add_system(set_scale_from_window)
@@ -298,8 +298,4 @@ fn setup_graphics(mut commands: Commands) {
         })
         // parallax
         .insert(ParallaxCameraComponent);
-}
-
-fn remove_dead_actors(commands: Commands, q: Query<Entity, With<ActorDead>>) {
-    despawn_with(commands, q);
 }
