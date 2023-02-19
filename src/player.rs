@@ -13,7 +13,7 @@ use crate::{
     kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity},
     level::{LevelEnemyCount, Trigger},
     states::{GameState, PauseState},
-    Actor, InGameItem, SystemOrderLabel, TextureHandles, CameraScale, 
+    Actor, CameraScale, InGameItem, SoundCollection, SystemOrderLabel, TextureHandles,
 };
 
 #[derive(Component)]
@@ -51,8 +51,15 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn detect_player_removed(mut commands: Commands, removals: RemovedComponents<Player>) {
+fn detect_player_removed(
+    mut commands: Commands,
+    removals: RemovedComponents<Player>,
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
+) {
     for _entity in removals.iter() {
+        audio.play(sound_collection.die.clone());
+
         commands.insert_resource(NextState(GameState::Dead));
     }
 }
@@ -64,13 +71,16 @@ fn detect_triggers(
     mut commands: Commands,
     level_enemy_count: Res<LevelEnemyCount>,
     q_enemies: Query<&Enemy>,
+
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
 ) {
     if let Ok(player) = q_player.get_single() {
         for trigger in q_triggers.iter() {
             if rapier_context.intersection_pair(player, trigger) == Some(true) {
                 let alive_enemies = q_enemies.iter().count();
 
-                println!("ALIVE: {}/{}",alive_enemies,level_enemy_count.0);
+                audio.play(sound_collection.land.clone());
 
                 if alive_enemies == 0 {
                     // genocide
@@ -168,6 +178,9 @@ fn player_movement(
         &mut CCVelocity,
         &mut Player,
     )>,
+
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
 ) {
     for (output, mut acc, mut vel, mut player) in &mut player_info {
         let up_start = keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
@@ -177,7 +190,10 @@ fn player_movement(
         let right = keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]);
 
         if output.grounded {
-            player.can_jump.reset();
+            if player.can_jump.finished() {
+                audio.play(sound_collection.land.clone());
+                player.can_jump.reset();
+            }
         } else {
             player.can_jump.tick(time.delta());
         }
@@ -186,6 +202,8 @@ fn player_movement(
 
         let y_axis = if up_start && !player.can_jump.finished() {
             // JUMP
+            audio.play(sound_collection.jump.clone());
+
             player.jump_start = time.elapsed_seconds();
             PLAYER_JUMP_ACCEL
         } else if up_held && time.elapsed_seconds() - PLAYER_JUMP_MAX_DURATION < player.jump_start {
@@ -208,6 +226,7 @@ fn player_movement(
             player
                 .can_jump
                 .set_elapsed(Duration::from_secs_f32(PLAYER_COYOTE_TIME));
+
             y_axis
         } else {
             0.

@@ -7,7 +7,7 @@ use crate::{
     level::Wall,
     player::Player,
     states::PauseState,
-    ActorDead, SystemOrderLabel,
+    ActorDead, SoundCollection, SystemOrderLabel,
 };
 
 // physical constants
@@ -179,12 +179,17 @@ fn player_kill_enemy(
     mut commands: Commands,
     mut q_player: Query<(&KinematicCharacterControllerOutput, &mut CCAcceleration), With<Player>>,
     q_attackboxes: Query<(&Parent, Entity), With<KillEnemyHitbox>>,
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
 ) {
     for (output, mut acc) in q_player.iter_mut() {
         for collision in &output.collisions {
             if let Ok((parent, _hitbox)) = q_attackboxes.get(collision.entity) {
                 // kill enemy
                 commands.entity(parent.get()).insert(ActorDead);
+
+                audio.play(sound_collection.kill.clone());
+
                 // bounce
                 acc.0.y += 0.4;
             }

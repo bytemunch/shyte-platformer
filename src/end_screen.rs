@@ -15,7 +15,7 @@ use crate::{
     pacifist_ending::despawn_pacifist_ending,
     states::GameState,
     util::despawn_with,
-    UiFont,
+    SoundCollection, UiFont,
 };
 
 back_to_enum! {
@@ -169,7 +169,12 @@ fn win_subtitle(
     ending_id: Res<Ending>,
     ui_font: Res<UiFont>,
     q_root_node: Query<Entity, With<RootNodeTag>>,
+
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
 ) {
+    audio.play(sound_collection.win.clone());
+
     let mut ending_type: String = match ending_id.0 {
         Endings::Normal => "normal".to_owned(),
         Endings::Genocide => "genocide".to_owned(),
@@ -231,10 +236,19 @@ fn ok_button(
     });
 }
 
-fn ok_button_pressed(mut commands: Commands, query: Query<&Interaction, With<OkButton>>) {
+fn ok_button_pressed(
+    mut commands: Commands,
+    query: Query<&Interaction, With<OkButton>>,
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
+) {
     for interaction in &query {
         match *interaction {
-            Interaction::Clicked => commands.insert_resource(NextState(GameState::MainMenu)),
+            Interaction::Clicked => {
+                audio.play(sound_collection.beep.clone());
+
+                commands.insert_resource(NextState(GameState::MainMenu))
+            }
             Interaction::Hovered => {}
             Interaction::None => {}
         }

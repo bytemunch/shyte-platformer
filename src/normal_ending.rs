@@ -20,7 +20,7 @@ use crate::{
     player::PLAYER_RADIUS,
     states::GameState,
     util::despawn_with,
-    CameraScale, TextureHandles, UiFont,
+    CameraScale, SoundCollection, TextureHandles, UiFont,
 };
 
 back_to_enum! {
@@ -337,7 +337,12 @@ fn actor_animation(
     mut q_fuqheed_body: Query<Entity, With<FuqheedBodyTag>>,
     texture_handles: Res<TextureHandles>,
     mut commands: Commands,
+
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
 ) {
+    audio.play(sound_collection.angry.clone());
+
     // mr fuqheed gets angry then jumps on the player, killing him
     let yellow_to_red = Tween::new(
         EaseFunction::QuadraticOut,
@@ -363,7 +368,14 @@ fn actor_animation(
 
 const JUMP_APEX: f32 = 2.3;
 
-fn fuqheed_jump(mut commands: Commands, mut q_fuqheed: Query<Entity, With<FuqheedTag>>) {
+fn fuqheed_jump(
+    mut commands: Commands,
+    mut q_fuqheed: Query<Entity, With<FuqheedTag>>,
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
+) {
+    audio.play(sound_collection.jump.clone());
+
     let right_to_left = Tween::new(
         EaseFunction::QuadraticOut,
         Duration::from_secs_f32(0.6),
@@ -424,7 +436,12 @@ fn remove_player(
     mut commands: Commands,
     q_player: Query<Entity, With<PlayerTag>>,
     mut ev_w: EventWriter<TweenCompleted>,
+
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
 ) {
+    audio.play(sound_collection.die.clone());
+
     if let Ok(player) = q_player.get_single() {
         commands.entity(player).despawn_recursive();
     }

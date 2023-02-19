@@ -8,7 +8,12 @@ BUG: DONTCARE: resizing while cutscene is active breaks background
 
 ## TODOS
 
-SOUND
+
+## SOUNDS
+
+laughing
+dialogue
+bgm
 
 ## NOTES
 
@@ -55,8 +60,6 @@ CREEP: 9-Patch box drawing
 ### A.K.A "NEVERTODOS"
 
 `it don't have to be perfect just ship SOMETHING for ONCE jeeeeeeeeeeez`
-
-REFAC: font as resource / default font
 
 REFAC: cutscene / dialogue system
 

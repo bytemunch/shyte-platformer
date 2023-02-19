@@ -3,15 +3,17 @@ use std::process::exit;
 use bevy::prelude::*;
 use iyes_loopless::prelude::*;
 
-use crate::UiFont;
 use crate::states::GameState;
 use crate::states::PauseState;
 use crate::util::despawn_with;
+use crate::SoundCollection;
+use crate::UiFont;
 
 // TODO a big ol refac here
 
 #[derive(Component)]
 struct MenuItem;
+
 #[derive(Component)]
 struct DeadItem;
 
@@ -68,10 +70,15 @@ fn despawn_menu(commands: Commands, query: Query<Entity, With<MenuItem>>) {
 fn pause_resume_button(
     mut commands: Commands,
     button_query: Query<&Interaction, With<ResumeButton>>,
+
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
 ) {
     for interact in &button_query {
         match *interact {
             Interaction::Clicked => {
+                audio.play(sound_collection.beep.clone());
+
                 commands.insert_resource(NextState(PauseState::Running));
             }
             Interaction::Hovered => {}
@@ -80,10 +87,18 @@ fn pause_resume_button(
     }
 }
 
-fn menu_button(mut commands: Commands, button_query: Query<&Interaction, With<MenuButton>>) {
+fn menu_button(
+    mut commands: Commands,
+    button_query: Query<&Interaction, With<MenuButton>>,
+
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
+) {
     for interact in &button_query {
         match *interact {
             Interaction::Clicked => {
+                audio.play(sound_collection.beep.clone());
+
                 commands.insert_resource(NextState(PauseState::Running));
                 commands.insert_resource(NextState(GameState::MainMenu));
             }
@@ -213,10 +228,16 @@ fn setup_menu(mut commands: Commands, ui_font: Res<UiFont>) {
         .insert(QuitButton);
 }
 
-fn play_button(mut commands: Commands, button_query: Query<&Interaction, With<PlayButton>>) {
+fn play_button(
+    mut commands: Commands,
+    button_query: Query<&Interaction, With<PlayButton>>,
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
+) {
     for interact in &button_query {
         match *interact {
             Interaction::Clicked => {
+                audio.play(sound_collection.beep.clone());
                 commands.insert_resource(NextState(GameState::IntroCutscene));
             }
             Interaction::Hovered => {}
@@ -224,7 +245,6 @@ fn play_button(mut commands: Commands, button_query: Query<&Interaction, With<Pl
         }
     }
 }
-
 
 fn editor_button(mut commands: Commands, button_query: Query<&Interaction, With<EditorButton>>) {
     for interact in &button_query {
@@ -358,22 +378,38 @@ fn setup_dead(mut commands: Commands, ui_font: Res<UiFont>) {
         .insert(QuitButton);
 }
 
-fn quit_button(query: Query<&Interaction, With<QuitButton>>) {
+fn quit_button(
+    query: Query<&Interaction, With<QuitButton>>,
+
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
+) {
     for interaction in &query {
         match *interaction {
-            Interaction::Clicked => exit(0),
+            Interaction::Clicked => {
+                audio.play(sound_collection.beep.clone());
+
+                exit(0)
+            }
             Interaction::Hovered => {}
             Interaction::None => {}
         }
     }
 }
 
-fn replay_button(mut commands: Commands, query: Query<&Interaction, With<ReplayButton>>) {
+fn replay_button(
+    mut commands: Commands,
+    query: Query<&Interaction, With<ReplayButton>>,
+
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
+) {
     for interaction in &query {
         match *interaction {
             Interaction::Clicked => {
                 commands.insert_resource(NextState(GameState::InGame));
                 commands.insert_resource(NextState(PauseState::Running));
+                audio.play(sound_collection.beep.clone());
             }
             Interaction::Hovered => {}
             Interaction::None => {}

@@ -70,6 +70,18 @@ pub struct TextureHandles {
     respect_fill: Option<Handle<Image>>,
 }
 
+#[derive(Resource)]
+pub struct SoundCollection {
+    jump: Handle<AudioSource>,
+    kill: Handle<AudioSource>,
+    die: Handle<AudioSource>,
+    fall: Handle<AudioSource>,
+    beep: Handle<AudioSource>,
+    angry: Handle<AudioSource>,
+    land: Handle<AudioSource>,
+    win: Handle<AudioSource>,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemLabel)]
 pub enum SystemOrderLabel {
     Input,
@@ -84,6 +96,7 @@ fn main() {
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // setup
         .add_startup_system(load_textures)
+        .add_startup_system(load_sounds)
         .add_startup_system(setup_font)
         .add_startup_system(setup_graphics)
         .add_system_to_stage(CoreStage::PreUpdate, remove_dead_actors)
@@ -146,6 +159,19 @@ fn load_textures(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.insert_resource(RepeatXY {
         handle: asset_server.load("img/chalk_fill.png"),
+    });
+}
+
+fn load_sounds(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(SoundCollection {
+        jump: asset_server.load("sounds/jump.ogg"),
+        kill: asset_server.load("sounds/kill.ogg"),
+        die: asset_server.load("sounds/die.ogg"),
+        fall: asset_server.load("sounds/fall.ogg"),
+        beep: asset_server.load("sounds/beep.ogg"),
+        angry: asset_server.load("sounds/angry.ogg"),
+        land: asset_server.load("sounds/land.ogg"),
+        win: asset_server.load("sounds/win.ogg"),
     });
 }
 

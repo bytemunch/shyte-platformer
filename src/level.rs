@@ -9,7 +9,7 @@ use crate::{
     player::spawn_player,
     states::{GameState, PauseState},
     util::despawn_with,
-    Actor, ActorDead, InGameItem, TextureHandles, DEATHPLANE,
+    Actor, ActorDead, InGameItem, SoundCollection, TextureHandles, DEATHPLANE,
 };
 pub struct LevelPlugin;
 
@@ -307,8 +307,9 @@ fn setup_level(
     spawn_player(
         &mut commands,
         &texture_handles,
-        Vec3::new(174., FLOOR_0 + 14.8, 10.), // end testing
-        // Vec3::new(0., FLOOR_0 + 0.8, 10.),
+        // Vec3::new(174., FLOOR_0 + 14.8, 10.), // end testing
+        Vec3::new(0., FLOOR_0 + 0.8, 10.), // start
+        // Vec3::new(115., FLOOR_0 + 3., 10.), // overhang testing
     );
 
     // first static enemy
@@ -584,9 +585,15 @@ fn despawn_level(commands: Commands, query: Query<Entity, With<InGameItem>>) {
     despawn_with(commands, query)
 }
 
-fn actor_fall_out(mut commands: Commands, query: Query<(&Transform, Entity), With<Actor>>) {
+fn actor_fall_out(
+    mut commands: Commands,
+    query: Query<(&Transform, Entity), With<Actor>>,
+    audio: Res<Audio>,
+    sound_collection: Res<SoundCollection>,
+) {
     for (transfrorm, entity) in &query {
         if transfrorm.translation.y < DEATHPLANE {
+            audio.play(sound_collection.fall.clone());
             commands.entity(entity).insert(ActorDead);
         }
     }
