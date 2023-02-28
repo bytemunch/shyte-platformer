@@ -17,6 +17,7 @@ mod util;
 
 use background::BackgroundPlugin;
 use bevy::audio::AudioSink;
+use bevy_embedded_assets::EmbeddedAssetPlugin;
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::render::render_resource::{AddressMode, SamplerDescriptor};
@@ -31,7 +32,7 @@ use bevy_tweening::TweeningPlugin;
 use cutscene::CutscenePlugin;
 use end_screen::EndScreenPlugin;
 use genocide_ending::GenocideEndingPlugin;
-use interfaces::{UserInterfacesPlugin, AudioVolume};
+use interfaces::{AudioVolume, UserInterfacesPlugin};
 use intro_cutscene::IntroCutscenePlugin;
 use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
@@ -96,7 +97,11 @@ pub enum SystemOrderLabel {
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(
+            DefaultPlugins
+                .build()
+                .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
+        )
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // setup
@@ -168,7 +173,6 @@ fn load_textures(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn load_sounds(mut commands: Commands, asset_server: Res<AssetServer>) {
-
     commands.insert_resource(AudioVolume(1.));
 
     commands.insert_resource(SoundCollection {
@@ -212,7 +216,7 @@ fn fixup_images(
 
                     texture.sampler_descriptor = ImageSampler::Descriptor(SamplerDescriptor {
                         address_mode_u: AddressMode::MirrorRepeat,
-                        address_mode_v: AddressMode::ClampToBorder,
+                        address_mode_v: AddressMode::ClampToEdge,
                         ..default()
                     });
 

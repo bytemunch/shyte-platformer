@@ -1,0 +1,10 @@
+[target.x86_64-pc-windows-msvc]
+linker = "lld"
+rustflags = [
+  "-Lnative=/home/sam/.xwin/crt/lib/x86_64",
+  "-Lnative=/home/sam/.xwin/sdk/lib/um/x86_64",
+  "-Lnative=/home/sam/.xwin/sdk/lib/ucrt/x86_64"
+]
+
+[target.wasm32-unknown-unknown]
+runner = "wasm-server-runner"

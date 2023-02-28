@@ -1,13 +1,14 @@
 [package]
-name = "my-first-bevy"
+name = "shyte-platformer"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.9.1", features = ["dynamic"] }
+bevy = { version = "0.9.1" }
 bevy-parallax = "0.3.0"
+bevy_embedded_assets = "0.6.2"
 bevy_particle_systems = "0.7.0"
 bevy_rapier2d = "0.20.0"
 bevy_tweening = "0.6.0"
@@ -31,17 +32,13 @@ opt-level = 3
 linker = "clang"
 rustflags = ["-Clink-arg=-fuse-ld=lld", "-Zshare-generics=y"]
 
-# NOTE: you must manually install https://github.com/michaeleisel/zld on mac. you can easily do this with the "brew" package manager:
-# `brew install michaeleisel/zld/zld`
-[target.x86_64-apple-darwin]
-rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld", "-Zshare-generics=y"]
-
-[target.aarch64-apple-darwin]
-rustflags = ["-C", "link-arg=-fuse-ld=/opt/homebrew/bin/zld", "-Zshare-generics=y"]
-
 [target.x86_64-pc-windows-msvc]
-linker = "rust-lld.exe"
-rustflags = ["-Zshare-generics=n"]
+linker = "lld"
+rustflags = [
+  "-Lnative=/home/sam/.xwin/crt/lib/x86_64",
+  "-Lnative=/home/sam/.xwin/sdk/lib/um/x86_64",
+  "-Lnative=/home/sam/.xwin/sdk/lib/ucrt/x86_64"
+]
 
 # Optional: Uncommenting the following improves compile times, but reduces the amount of debug info to 'line number tables only'
 # In most cases the gains are negligible, but if you are on macos and have slow compile times you should see significant gains.
