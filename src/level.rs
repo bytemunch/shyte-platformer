@@ -9,7 +9,7 @@ use crate::{
     player::spawn_player,
     states::{GameState, PauseState},
     util::despawn_with,
-    Actor, ActorDead, InGameItem, SoundCollection, TextureHandles, DEATHPLANE,
+    Actor, ActorDead, InGameItem, SoundCollection, TextureHandles, DEATHPLANE, interfaces::AudioVolume,
 };
 pub struct LevelPlugin;
 
@@ -586,10 +586,11 @@ fn actor_fall_out(
     query: Query<(&Transform, Entity), With<Actor>>,
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for (transfrorm, entity) in &query {
         if transfrorm.translation.y < DEATHPLANE {
-            audio.play(sound_collection.fall.clone());
+            audio.play_with_settings(sound_collection.fall.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
             commands.entity(entity).insert(ActorDead);
         }
     }

@@ -19,7 +19,7 @@ use crate::{
     level::{create_box, FLOOR_0, FLOOR_0_BOTTOM},
     player::PLAYER_RADIUS,
     states::GameState,
-    CameraScale, SoundCollection, TextureHandles, UiFont,
+    CameraScale, SoundCollection, TextureHandles, UiFont, interfaces::AudioVolume,
 };
 
 back_to_enum! {
@@ -280,15 +280,15 @@ fn speech_line_1(
 
 const JUMP_APEX: f32 = 2.3;
 
-// TODO
 fn player_jump(
     mut commands: Commands,
     mut q_player: Query<Entity, With<PlayerTag>>,
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
-    audio.play(sound_collection.jump.clone());
+    audio.play_with_settings(sound_collection.jump.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
     let right_to_left = Tween::new(
         EaseFunction::QuadraticOut,
         Duration::from_secs_f32(0.6),
@@ -352,8 +352,9 @@ fn remove_fuqheed(
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
-    audio.play(sound_collection.kill.clone());
+    audio.play_with_settings(sound_collection.kill.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
     if let Ok(fuqheed) = q_fuqheed.get_single() {
         commands.entity(fuqheed).despawn_recursive();
     }

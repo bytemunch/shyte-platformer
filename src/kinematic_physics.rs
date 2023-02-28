@@ -7,7 +7,7 @@ use crate::{
     level::Wall,
     player::Player,
     states::PauseState,
-    ActorDead, SoundCollection, SystemOrderLabel,
+    ActorDead, SoundCollection, SystemOrderLabel, interfaces::AudioVolume,
 };
 
 // physical constants
@@ -181,6 +181,7 @@ fn player_kill_enemy(
     q_attackboxes: Query<(&Parent, Entity), With<KillEnemyHitbox>>,
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for (output, mut acc) in q_player.iter_mut() {
         for collision in &output.collisions {
@@ -188,7 +189,7 @@ fn player_kill_enemy(
                 // kill enemy
                 commands.entity(parent.get()).insert(ActorDead);
 
-                audio.play(sound_collection.kill.clone());
+                audio.play_with_settings(sound_collection.kill.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
 
                 // bounce
                 acc.0.y += 0.4;

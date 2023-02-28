@@ -31,7 +31,7 @@ use bevy_tweening::TweeningPlugin;
 use cutscene::CutscenePlugin;
 use end_screen::EndScreenPlugin;
 use genocide_ending::GenocideEndingPlugin;
-use interfaces::UserInterfacesPlugin;
+use interfaces::{UserInterfacesPlugin, AudioVolume};
 use intro_cutscene::IntroCutscenePlugin;
 use kinematic_physics::KinematicPhysics;
 use level::LevelPlugin;
@@ -168,6 +168,9 @@ fn load_textures(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn load_sounds(mut commands: Commands, asset_server: Res<AssetServer>) {
+
+    commands.insert_resource(AudioVolume(1.));
+
     commands.insert_resource(SoundCollection {
         jump: asset_server.load("sounds/jump.ogg"),
         kill: asset_server.load("sounds/kill.ogg"),

@@ -1,5 +1,6 @@
 use std::process::exit;
 
+use bevy::audio::AudioSink;
 use bevy::prelude::*;
 use iyes_loopless::prelude::*;
 
@@ -21,6 +22,9 @@ struct DeadItem;
 
 #[derive(Component)]
 struct ReplayButton;
+
+#[derive(Component)]
+struct MuteButton;
 
 // TODO next: death and retry
 #[derive(Component)]
@@ -65,6 +69,7 @@ impl Plugin for UserInterfacesPlugin {
             .add_system(menu_button)
             .add_system(editor_button)
             .add_system(pause_resume_button.run_in_state(PauseState::Paused))
+            .add_system(pause_mute_button)
             .add_system(play_button.run_in_state(GameState::MainMenu));
     }
 }
@@ -75,13 +80,54 @@ fn pause_resume_button(
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for interact in &button_query {
         match *interact {
             Interaction::Clicked => {
-                audio.play(sound_collection.beep.clone());
+                audio.play_with_settings(
+                    sound_collection.beep.clone(),
+                    PlaybackSettings::ONCE.with_volume(audio_volume.0),
+                );
 
                 commands.insert_resource(NextState(PauseState::Running));
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+#[derive(Resource)]
+pub struct AudioVolume(pub f32);
+
+fn pause_mute_button(
+    mut commands: Commands,
+    button_query: Query<&Interaction, With<MuteButton>>,
+
+    // audio: Res<Audio>,
+    audio_sinks: Res<Assets<AudioSink>>,
+    // sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
+) {
+    for interact in &button_query {
+        match *interact {
+            Interaction::Clicked => {
+                // TODO dry, one loop, refac etc
+                // TODO debounce
+                if audio_volume.0 == 0. {
+                    for (_id, sink) in audio_sinks.iter() {
+                        sink.set_volume(1.);
+                    }
+
+                    commands.insert_resource(AudioVolume(1.));
+                } else {
+                    for (_id, sink) in audio_sinks.iter() {
+                        sink.set_volume(0.);
+                    }
+
+                    commands.insert_resource(AudioVolume(0.));
+                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -95,11 +141,15 @@ fn menu_button(
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for interact in &button_query {
         match *interact {
             Interaction::Clicked => {
-                audio.play(sound_collection.beep.clone());
+                audio.play_with_settings(
+                    sound_collection.beep.clone(),
+                    PlaybackSettings::ONCE.with_volume(audio_volume.0),
+                );
 
                 commands.insert_resource(NextState(PauseState::Running));
                 commands.insert_resource(NextState(GameState::MainMenu));
@@ -235,11 +285,15 @@ fn play_button(
     button_query: Query<&Interaction, With<PlayButton>>,
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for interact in &button_query {
         match *interact {
             Interaction::Clicked => {
-                audio.play(sound_collection.beep.clone());
+                audio.play_with_settings(
+                    sound_collection.beep.clone(),
+                    PlaybackSettings::ONCE.with_volume(audio_volume.0),
+                );
                 commands.insert_resource(NextState(GameState::IntroCutscene));
             }
             Interaction::Hovered => {}
@@ -385,11 +439,15 @@ fn quit_button(
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for interaction in &query {
         match *interaction {
             Interaction::Clicked => {
-                audio.play(sound_collection.beep.clone());
+                audio.play_with_settings(
+                    sound_collection.beep.clone(),
+                    PlaybackSettings::ONCE.with_volume(audio_volume.0),
+                );
 
                 exit(0)
             }
@@ -405,13 +463,17 @@ fn replay_button(
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for interaction in &query {
         match *interaction {
             Interaction::Clicked => {
                 commands.insert_resource(NextState(GameState::InGame));
                 commands.insert_resource(NextState(PauseState::Running));
-                audio.play(sound_collection.beep.clone());
+                audio.play_with_settings(
+                    sound_collection.beep.clone(),
+                    PlaybackSettings::ONCE.with_volume(audio_volume.0),
+                );
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -539,6 +601,35 @@ fn setup_pause_menu(mut commands: Commands, ui_font: Res<UiFont>) {
         })
         .insert(PauseItem)
         .insert(ReplayButton);
+
+    // MUTE button
+    commands
+        .spawn(ButtonBundle {
+            style: Style {
+                size: Size::new(Val::Px(150.0), Val::Px(65.0)),
+                // center button
+                margin: UiRect::all(Val::Auto),
+                // horizontally center child text
+                justify_content: JustifyContent::Center,
+                // vertically center child text
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            background_color: Color::rgb(128., 0., 0.).into(),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                "MUTE",
+                TextStyle {
+                    font: ui_font.0.clone(),
+                    font_size: 40.0,
+                    color: Color::rgb(0.9, 0.9, 0.9),
+                },
+            ));
+        })
+        .insert(PauseItem)
+        .insert(MuteButton);
 
     // quit button
     commands

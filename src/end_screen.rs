@@ -15,7 +15,7 @@ use crate::{
     pacifist_ending::PacifistEndingTag,
     states::GameState,
     util::despawn_with,
-    BackgroundMusic, SoundCollection, UiFont,
+    BackgroundMusic, SoundCollection, UiFont, interfaces::AudioVolume,
 };
 
 back_to_enum! {
@@ -179,8 +179,9 @@ fn win_subtitle(
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
-    audio.play(sound_collection.win.clone());
+    audio.play_with_settings(sound_collection.win.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
 
     let mut ending_type: String = match ending_id.0 {
         Endings::Normal => "normal".to_owned(),
@@ -248,11 +249,12 @@ fn ok_button_pressed(
     query: Query<&Interaction, With<OkButton>>,
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for interaction in &query {
         match *interaction {
             Interaction::Clicked => {
-                audio.play(sound_collection.beep.clone());
+                audio.play_with_settings(sound_collection.beep.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
 
                 commands.insert_resource(NextState(GameState::MainMenu))
             }

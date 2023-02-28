@@ -13,7 +13,7 @@ use crate::{
     kinematic_physics::{CCAcceleration, CCVelocity, KinematicGravity},
     level::{LevelEnemyCount, Trigger},
     states::{GameState, PauseState},
-    Actor, CameraScale, InGameItem, SoundCollection, SystemOrderLabel, TextureHandles,
+    Actor, CameraScale, InGameItem, SoundCollection, SystemOrderLabel, TextureHandles, interfaces::AudioVolume,
 };
 
 #[derive(Component)]
@@ -56,9 +56,10 @@ fn detect_player_removed(
     removals: RemovedComponents<Player>,
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for _entity in removals.iter() {
-        audio.play(sound_collection.die.clone());
+        audio.play_with_settings(sound_collection.die.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
 
         commands.insert_resource(NextState(GameState::Dead));
     }
@@ -74,13 +75,14 @@ fn detect_triggers(
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     if let Ok(player) = q_player.get_single() {
         for trigger in q_triggers.iter() {
             if rapier_context.intersection_pair(player, trigger) == Some(true) {
                 let alive_enemies = q_enemies.iter().count();
 
-                audio.play(sound_collection.land.clone());
+                audio.play_with_settings(sound_collection.land.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
 
                 if alive_enemies == 0 {
                     // genocide
@@ -181,6 +183,7 @@ fn player_movement(
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
     for (output, mut acc, mut vel, mut player) in &mut player_info {
         let up_start = keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]);
@@ -191,7 +194,7 @@ fn player_movement(
 
         if output.grounded {
             if player.can_jump.finished() {
-                audio.play(sound_collection.land.clone());
+                audio.play_with_settings(sound_collection.land.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
                 player.can_jump.reset();
             }
         } else {
@@ -202,7 +205,7 @@ fn player_movement(
 
         let y_axis = if up_start && !player.can_jump.finished() {
             // JUMP
-            audio.play(sound_collection.jump.clone());
+            audio.play_with_settings(sound_collection.jump.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
 
             player.jump_start = time.elapsed_seconds();
             PLAYER_JUMP_ACCEL

@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::RapierConfiguration;
-use iyes_loopless::{prelude::{AppLooplessStateExt, IntoConditionalSystem}, state::{CurrentState, NextState}};
+use iyes_loopless::{
+    prelude::{AppLooplessStateExt, IntoConditionalSystem},
+    state::{CurrentState, NextState},
+};
 
-use crate::states::{PauseState, GameState};
+use crate::states::{GameState, PauseState};
 pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
@@ -12,7 +15,7 @@ impl Plugin for PausePlugin {
             .add_enter_system(PauseState::Paused, pause_physics)
             .add_exit_system(PauseState::Paused, unpause_physics)
             // pause systems
-            .add_system(pause_input.run_in_state(GameState::InGame));
+            .add_system(pause_input.run_not_in_state(GameState::MainMenu));
     }
 }
 

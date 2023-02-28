@@ -8,7 +8,9 @@ BUG: DONTCARE: resizing while cutscene is active breaks background
 
 ## TODOS
 
-TODO: SFX & BGM mute buttons
+TODO: Seperate SFX & BGM mute buttons
+
+TODO: Debounce mute button
 
 ## SOUNDS
 

@@ -17,7 +17,7 @@ use crate::{
     player::PLAYER_RADIUS,
     states::GameState,
     util::despawn_with,
-    CameraScale, SoundCollection, TextureHandles, UiFont, BackgroundMusic,
+    CameraScale, SoundCollection, TextureHandles, UiFont, BackgroundMusic, interfaces::AudioVolume,
 };
 
 back_to_enum! {
@@ -395,8 +395,9 @@ fn actor_animation(
 
     audio: Res<Audio>,
     sound_collection: Res<SoundCollection>,
+    audio_volume: Res<AudioVolume>,
 ) {
-    audio.play(sound_collection.angry.clone());
+    audio.play_with_settings(sound_collection.angry.clone(), PlaybackSettings::ONCE.with_volume(audio_volume.0));
 
     let yellow_to_red = Tween::new(
         EaseFunction::QuadraticOut,
